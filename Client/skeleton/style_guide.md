@@ -6,4 +6,4 @@ As far as style goes, please have an automatic color scheme similar to Beatrice 
 
 "Rainbow Mode" should have a style similar to that of the show Rainbow Brite 
 
-"Meture Style" should have a style like that of the PBS Documentary Cat Tales (that is, muted, natural colors, cat fur texture for backgrounds, or green grass)
+"Meture Style" should have a style like that of the Netflix movie A Whisker Away
