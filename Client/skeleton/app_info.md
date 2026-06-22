@@ -5,13 +5,13 @@
 
 ### Identifying the App
 
-1. What problem does this app solve? - 
+1. What problem does this app solve? - This app provides users with a fun way to record their schedules. Every day they are given a new Cat Fact, and specific events can include a special kitty image to brighten their day
 
-2. Why would someone use it? - 
+2. Why would someone use it? - Someone might use the Kitty Day Calender to have a more fun and enjoyable experience logging their schedules, and viewing their listed events
 
-3. What pain point exists today? - 
+3. What pain point exists today? - Generic calender apps are boring
 
-4. How are users solving this problem? - 
+4. How are users solving this problem? - Users can change the color of their event notification
 
 
 ### Who is the user
