@@ -4,6 +4,6 @@ As far as style goes, please have an automatic color scheme similar to Beatrice 
 
 "Light Mode" is the default style
 
-"Rainbow Mode" should have a style similar to that of the show Rainbow Brite 
+"Rainbow Mode" should have more a Thunder Cats theme, from the 1980s show (primarly red, blue, gold, tiger stripes, cheetah spots, and leapoard print) 
 
 "Meture Style" should have a style like that of the Netflix movie A Whisker Away
