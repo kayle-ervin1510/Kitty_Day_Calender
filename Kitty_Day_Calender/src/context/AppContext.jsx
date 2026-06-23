@@ -119,13 +119,34 @@ export function AppProvider({ children }) {
   }, [])
 
   async function loadUserData(authUser) {
-    const { data: profile, error } = await supabase
+    let { data: profile } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('auth_id', authUser.id)
       .single()
 
-    if (error || !profile) {
+    // Profile row missing — can happen if the trigger fired before migration 7
+    // (first signup had RLS error). Re-create it from auth metadata now that
+    // the user has a valid session and RLS allows the insert.
+    if (!profile) {
+      const meta = authUser.user_metadata || {}
+      const { data: created } = await supabase
+        .from('user_profiles')
+        .insert({
+          auth_id:        authUser.id,
+          username:       meta.username       || authUser.email.split('@')[0],
+          name:           meta.name           || authUser.email.split('@')[0],
+          preferred_name: meta.preferred_name || meta.name?.split(' ')[0] || authUser.email.split('@')[0],
+          email:          authUser.email,
+          phone_number:   meta.phone_number   || '',
+          timezone:       meta.timezone       || 'UTC',
+        })
+        .select()
+        .single()
+      profile = created
+    }
+
+    if (!profile) {
       setInitializing(false)
       return
     }
@@ -164,24 +185,23 @@ export function AppProvider({ children }) {
 
     if (existing) return { success: false, error: 'Username already taken.' }
 
-    const { data, error } = await supabase.auth.signUp({
+    // Profile data is passed as metadata so the DB trigger can create the
+    // user_profiles row server-side (bypassing RLS) on auth.users insert.
+    const { error } = await supabase.auth.signUp({
       email:    userData.email,
       password: userData.password,
+      options: {
+        data: {
+          username:       userData.username,
+          name:           userData.name,
+          preferred_name: userData.preferredName || userData.name.split(' ')[0],
+          phone_number:   userData.phoneNumber || '',
+          timezone:       Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      },
     })
 
     if (error) return { success: false, error: error.message }
-
-    const { error: profileError } = await supabase.from('user_profiles').insert({
-      auth_id:        data.user.id,
-      username:       userData.username,
-      name:           userData.name,
-      preferred_name: userData.preferredName || userData.name.split(' ')[0],
-      email:          userData.email,
-      phone_number:   userData.phoneNumber || '',
-      timezone:       Intl.DateTimeFormat().resolvedOptions().timeZone,
-    })
-
-    if (profileError) return { success: false, error: profileError.message }
 
     // Keep pendingUser so ConfirmPage has the email to display.
     // onAuthStateChange clears it once the session is confirmed.
@@ -194,18 +214,15 @@ export function AppProvider({ children }) {
     let email = usernameOrEmail
 
     if (!usernameOrEmail.includes('@')) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('email')
-        .eq('username', usernameOrEmail)
-        .maybeSingle()
+      const { data: resolvedEmail } = await supabase
+        .rpc('get_email_by_username', { p_username: usernameOrEmail })
 
-      if (!profile) return { success: false, error: 'Invalid username or password.' }
-      email = profile.email
+      if (!resolvedEmail) return { success: false, error: 'Invalid username or password.' }
+      email = resolvedEmail
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) return { success: false, error: 'Invalid username/email or password.' }
+    if (error) return { success: false, error: error.message }
     return { success: true }
   }
 
