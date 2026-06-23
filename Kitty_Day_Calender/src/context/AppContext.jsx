@@ -38,6 +38,7 @@ export function AppProvider({ children }) {
     showFederalHolidays: false,
     showInternationalHolidays: false,
     showFamilyEvents: false,
+    showCatHolidays: false,
   })
   // Cat fact: locked to one per calendar day (resets on page refresh since no persistence)
   const [catFactDate, setCatFactDate] = useState(null)
@@ -136,6 +137,15 @@ export function AppProvider({ children }) {
     }
   }
 
+  function restoreEvent(id) {
+    const target = deletedEvents.find(e => e.id === id)
+    if (target) {
+      const { deletedAt, ...restored } = target
+      setEvents(prev => [...prev, restored])
+      setDeletedEvents(prev => prev.filter(e => e.id !== id))
+    }
+  }
+
   function emptyLitterBox() {
     setDeletedEvents(prev => prev.filter(e => e.userId !== user?.id))
   }
@@ -204,7 +214,7 @@ export function AppProvider({ children }) {
       catFact, catFactDate,
       getDailyCatFact,
       register, confirmRegistration, login, logout, updateProfile,
-      addEvent, updateEvent, deleteEvent, emptyLitterBox, updatePrefs,
+      addEvent, updateEvent, deleteEvent, restoreEvent, emptyLitterBox, updatePrefs,
       addFamilyMember, removeFamilyMember, registerFamilyMember, lookupUser,
     }}>
       {children}

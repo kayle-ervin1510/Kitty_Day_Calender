@@ -2,6 +2,20 @@ import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import litterBoxPhoto from '../assets/litter-box-photo.png'
 
+function PawPrintIcon({ className }) {
+  return (
+    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+      {/* Main central pad */}
+      <ellipse cx="16" cy="22.5" rx="7" ry="5.5" fill="currentColor" />
+      {/* Four toe beans */}
+      <ellipse cx="7"  cy="14.5" rx="2.8" ry="3.5" fill="currentColor" />
+      <ellipse cx="12" cy="10.5" rx="2.8" ry="3.5" fill="currentColor" />
+      <ellipse cx="20" cy="10.5" rx="2.8" ry="3.5" fill="currentColor" />
+      <ellipse cx="25" cy="14.5" rx="2.8" ry="3.5" fill="currentColor" />
+    </svg>
+  )
+}
+
 const MONTH_NAMES = [
   'Jan','Feb','Mar','Apr','May','Jun',
   'Jul','Aug','Sep','Oct','Nov','Dec',
@@ -33,7 +47,7 @@ function LitterBoxImg({ size = 90 }) {
 }
 
 export default function LitterBoxPage() {
-  const { deletedEvents, emptyLitterBox } = useApp()
+  const { deletedEvents, emptyLitterBox, restoreEvent } = useApp()
   const [confirmClean, setConfirmClean]   = useState(false)
   const [cleaned, setCleaned]             = useState(false)
 
@@ -85,9 +99,20 @@ export default function LitterBoxPage() {
                       </span>
                     )}
                   </div>
-                  <span className="litterbox-item-deleted">
-                    Shredded {formatDeletedAt(e.deletedAt)}
-                  </span>
+                  <div className="litterbox-item-actions">
+                    <span className="litterbox-item-deleted">
+                      Shredded {formatDeletedAt(e.deletedAt)}
+                    </span>
+                    <button
+                      className="save-it-btn"
+                      title="Save it — restore this event"
+                      aria-label="Save it — restore this event"
+                      onClick={() => restoreEvent(e.id)}
+                    >
+                      <PawPrintIcon className="save-it-icon" />
+                      <span className="save-it-label">Save it!</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -13,8 +13,25 @@ import imgColumbusDay   from '../assets/federal-holidays/columbus-day.png'
 import imgVeteransDay   from '../assets/federal-holidays/veterans-day.png'
 import imgThanksgiving  from '../assets/federal-holidays/thanksgiving.png'
 import imgChristmas     from '../assets/federal-holidays/christmas.png'
-import scratchItImg    from '../assets/scratch-it.png'
 import oopsCat        from '../assets/oops-cat.png'
+
+function ScratchIcon({ className }) {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <g stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none">
+        <path d="M7,3 Q5,10 6,20 Q6.5,25 8,29" />
+        <path d="M13,2 Q11,9 12,19 Q12.5,24 14,28" />
+        <path d="M19,2 Q17,9 18,19 Q18.5,24 20,28" />
+        <path d="M25,3 Q23,10 24,20 Q24.5,25 26,29" />
+      </g>
+    </svg>
+  )
+}
 
 
 // ── Holiday data ─────────────────────────────────────────────────────────────
@@ -223,6 +240,48 @@ const INTL_HOLIDAYS = [
   { month: 11, day: 27, name: "Int'l Day of Epidemic Preparedness" },
 ]
 
+const CAT_HOLIDAYS = [
+  // ── January ──
+  { month: 0,  day: 2,  name: "Happy Mew Year for Cats Day 🎊" },
+  { month: 0,  day: 14, name: "National Dress Up Your Pet Day 👗" },
+  { month: 0,  day: 22, name: "Answer Your Cat's Questions Day 🐱❓" },
+  // ── February ──
+  { month: 1,  day: 23, name: "World Spay Day ✂️" },
+  // ── March ──
+  { month: 2,  day: 2,  name: "International Rescue Cat Day 🐾" },
+  { month: 2,  day: 3,  name: "What If Cats Had Opposable Thumbs? Day 👍🐱" },
+  { month: 2,  day: 17, name: "Saint Gertrude of Nivelles Day (Patron of Cats) 😇" },
+  { month: 2,  day: 23, name: "Cuddly Kitten Day 🐱💕" },
+  // ── April ──
+  { month: 3,  day: 6,  name: "National Siamese Cat Day 🐈" },
+  { month: 3,  day: 11, name: "National Pet Day 🐾" },
+  { month: 3,  day: 19, name: "National Cat Lady Day 👩🐱" },
+  { month: 3,  day: 27, name: "Free Feral Cat Spay Day ✂️" },
+  { month: 3,  day: 30, name: "National Hairball Awareness Day 🤢🐱" },
+  { month: 3,  day: 30, name: "National Tabby Day 🐈" },
+  // ── May ──
+  { month: 4,  day: 30, name: "International Hug Your Cat Day 🤗🐱" },
+  // ── June ──
+  { month: 5,  day: 4,  name: "National Hug Your Cat Day 🤗🐱" },
+  { month: 5,  day: 15, name: "Take Your Cat to Work Day 💼🐱" },
+  { month: 5,  day: 19, name: "International Box Day 📦🐱" },
+  { month: 5,  day: 19, name: "National Garfield the Cat Day 🍕🐱" },
+  // ── July ──
+  { month: 6,  day: 10, name: "National Kitten Day 🐱✨" },
+  // ── August ──
+  { month: 7,  day: 8,  name: "International Cat Day 😺" },
+  { month: 7,  day: 15, name: "Check the Chip Day 📡🐾" },
+  { month: 7,  day: 22, name: "National Take Your Cat to the Vet Day 🏥🐱" },
+  // ── September ──
+  { month: 8,  day: 1,  name: "Ginger Cat Appreciation Day 🧡🐱" },
+  // ── October ──
+  { month: 9,  day: 16, name: "Global Cat Day 🌍🐱" },
+  { month: 9,  day: 27, name: "National Black Cat Day 🖤🐱" },
+  { month: 9,  day: 29, name: "National Cat Day 🐱🎉" },
+  // ── December ──
+  { month: 11, day: 15, name: "Cat Herders Day 🐾🐾🐾" },
+]
+
 // ── Calendar helpers ─────────────────────────────────────────────────────────
 
 const MONTH_NAMES = [
@@ -296,6 +355,11 @@ export default function CalendarPage() {
       INTL_HOLIDAYS
         .filter(h => h.month === m && h.day === d)
         .forEach(h => out.push({ ...h, kind: 'intl' }))
+    }
+    if (prefs.showCatHolidays) {
+      CAT_HOLIDAYS
+        .filter(h => h.month === m && h.day === d)
+        .forEach(h => out.push({ ...h, kind: 'cat' }))
     }
     return out
   }
@@ -507,7 +571,7 @@ export default function CalendarPage() {
               return (
                 <div key={i}>
                   <div className={`cal-day-row cal-day-row-${h.kind}`}>
-                    <span>{h.kind === 'federal' ? '🇺🇸' : '🌍'}</span>
+                    <span>{h.kind === 'federal' ? '🇺🇸' : h.kind === 'cat' ? '🐱' : '🌍'}</span>
                     <span>{h.name}</span>
                   </div>
                   {holidayImg && (
@@ -556,7 +620,7 @@ export default function CalendarPage() {
                     }}
                     aria-label="Scratch It — send to Litter Box"
                   >
-                    <img src={scratchItImg} alt="Scratch It" className="scratch-it-icon" />
+                    <ScratchIcon className="scratch-it-icon" />
                   </button>
                 </div>
               </div>
@@ -662,6 +726,12 @@ export default function CalendarPage() {
           onClick={() => updatePrefs({ showInternationalHolidays: !prefs.showInternationalHolidays })}
         >
           {prefs.showInternationalHolidays ? '✓' : '+'} International Holidays 🌍
+        </button>
+        <button
+          className={`btn btn-sm${prefs.showCatHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
+          onClick={() => updatePrefs({ showCatHolidays: !prefs.showCatHolidays })}
+        >
+          {prefs.showCatHolidays ? '✓' : '+'} Cat Holidays 🐱
         </button>
       </div>
 
