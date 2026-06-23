@@ -16,7 +16,8 @@ import ErrorPage from './pages/ErrorPage'
 import './App.css'
 
 function ProtectedLayout() {
-  const { user } = useApp()
+  const { user, initializing } = useApp()
+  if (initializing) return null
   if (!user) return <Navigate to="/login" replace />
   return (
     <div className="app-layout">
@@ -32,7 +33,8 @@ function ProtectedLayout() {
 // pendingUser (mid-registration) is NOT considered logged in here,
 // so /confirm remains accessible after register().
 function PublicLayout() {
-  const { user } = useApp()
+  const { user, initializing } = useApp()
+  if (initializing) return null
   if (user) return <Navigate to="/home" replace />
   return <Outlet />
 }

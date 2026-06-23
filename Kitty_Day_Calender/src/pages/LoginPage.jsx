@@ -15,10 +15,10 @@ export default function LoginPage() {
     password: '', confirmPassword: '',
   })
 
-  function handleSignIn(e) {
+  async function handleSignIn(e) {
     e.preventDefault()
     setError('')
-    const result = login(signInForm.usernameOrEmail, signInForm.password)
+    const result = await login(signInForm.usernameOrEmail, signInForm.password)
     if (result.success) {
       navigate('/home')
     } else {
@@ -26,7 +26,7 @@ export default function LoginPage() {
     }
   }
 
-  function handleSignUp(e) {
+  async function handleSignUp(e) {
     e.preventDefault()
     setError('')
     if (signUpForm.email !== signUpForm.confirmEmail) {
@@ -41,7 +41,7 @@ export default function LoginPage() {
       setError('Password must be at least 6 characters.')
       return
     }
-    const result = register(signUpForm)
+    const result = await register(signUpForm)
     if (result.success) {
       navigate('/confirm', { state: { email: signUpForm.email } })
     } else {

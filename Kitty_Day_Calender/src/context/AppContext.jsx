@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 const CAT_FACTS = [
   'Cats sleep 12–16 hours per day!',
@@ -23,16 +24,63 @@ const CAT_FACTS = [
   'Indoor cats live 12–17 years on average.',
 ]
 
+// Normalize DB snake_case rows to camelCase so pages don't need to change.
+function normalizeProfile(row) {
+  return {
+    id:                   row.id,
+    authId:               row.auth_id,
+    username:             row.username,
+    name:                 row.name,
+    preferredName:        row.preferred_name,
+    email:                row.email,
+    phoneNumber:          row.phone_number,
+    profilePic:           row.profile_pic,
+    timezone:             row.timezone,
+    notificationsEnabled: row.notifications_enabled,
+    notificationMethod:   row.notification_method,
+    isFamilyAccount:      row.is_family_account,
+    createdAt:            row.created_at,
+  }
+}
+
+function normalizeEvent(row) {
+  return {
+    id:            row.id,
+    userId:        row.user_id,
+    name:          row.name,
+    date:          row.date,
+    startTime:     row.start_time,
+    endTime:       row.end_time,
+    eventType:     row.event_type,
+    notifyOptions: row.notify_options,
+    familyVisible: row.family_visible,
+    note:          row.note,
+    deletedAt:     row.deleted_at,
+    createdAt:     row.created_at,
+  }
+}
+
+function normalizeMember(row) {
+  return {
+    id:                   row.id,
+    familyAccountId:      row.family_account_id,
+    name:                 row.name,
+    email:                row.email,
+    phone:                row.phone,
+    notificationsEnabled: row.notifications_enabled,
+    createdAt:            row.created_at,
+  }
+}
+
 const AppContext = createContext(null)
 
 export function AppProvider({ children }) {
-  const [users, setUsers] = useState([])
-  const [user, setUser] = useState(null)
-  // pendingUser: registered but not yet past the confirm screen
-  const [pendingUser, setPendingUser] = useState(null)
-  const [events, setEvents] = useState([])
-  const [deletedEvents, setDeletedEvents] = useState([])
-  const [familyMembers, setFamilyMembers] = useState([])
+  const [user, setUser]                       = useState(null)
+  const [pendingUser, setPendingUser]         = useState(null)
+  const [initializing, setInitializing]       = useState(true)
+  const [events, setEvents]                   = useState([])
+  const [familyMembers, setFamilyMembers]     = useState([])
+  const [familyAccountId, setFamilyAccountId] = useState(null)
   const [prefs, setPrefs] = useState({
     theme: 'light',
     showFederalHolidays: false,
@@ -40,115 +88,297 @@ export function AppProvider({ children }) {
     showFamilyEvents: false,
     showCatHolidays: false,
   })
-  // Cat fact: locked to one per calendar day (resets on page refresh since no persistence)
   const [catFactDate, setCatFactDate] = useState(null)
-  const [catFact, setCatFact] = useState(null)
+  const [catFact, setCatFact]         = useState(null)
 
-  function getDailyCatFact() {
-    const today = new Date().toDateString()
-    if (catFactDate === today && catFact) return catFact
-    const idx = Math.floor(Math.random() * CAT_FACTS.length)
-    const fact = CAT_FACTS[idx]
-    setCatFactDate(today)
-    setCatFact(fact)
-    return fact
-  }
+  // ── Session bootstrap ──────────────────────────────────────────────────────
 
-  function register(userData) {
-    const dup = users.find(
-      u => u.username === userData.username || u.email === userData.email
-    )
-    if (dup) {
-      return {
-        success: false,
-        error: dup.username === userData.username
-          ? 'Username already taken.'
-          : 'Email already in use.',
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        loadUserData(session.user)
+      } else {
+        setInitializing(false)
       }
-    }
-    const newUser = {
-      id: crypto.randomUUID(),
-      name: userData.name,
-      preferredName: userData.preferredName || userData.name.split(' ')[0],
-      username: userData.username,
-      email: userData.email,
-      password: userData.password,
-      phoneNumber: userData.phoneNumber || '',
-      profilePic: '🐱',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      notificationsEnabled: false,
-      notificationMethod: 'email',
-      isFamilyAccount: false,
-    }
-    setUsers(prev => [...prev, newUser])
-    setPendingUser(newUser)
-    return { success: true }
-  }
+    })
 
-  function confirmRegistration() {
-    if (pendingUser) {
-      setUser(pendingUser)
-      setPendingUser(null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        loadUserData(session.user)
+      } else {
+        setUser(null)
+        setPendingUser(null)
+        setEvents([])
+        setFamilyMembers([])
+        setFamilyAccountId(null)
+        setInitializing(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function loadUserData(authUser) {
+    const { data: profile, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('auth_id', authUser.id)
+      .single()
+
+    if (error || !profile) {
+      setInitializing(false)
+      return
     }
-  }
 
-  function login(usernameOrEmail, password) {
-    const found = users.find(
-      u =>
-        (u.username === usernameOrEmail || u.email === usernameOrEmail) &&
-        u.password === password
-    )
-    if (!found) return { success: false, error: 'Invalid username/email or password.' }
-    setUser(found)
-    return { success: true }
-  }
-
-  function logout() {
-    setUser(null)
+    setUser(normalizeProfile(profile))
     setPendingUser(null)
-  }
 
-  function updateProfile(updates) {
-    const updated = { ...user, ...updates }
-    setUser(updated)
-    setUsers(prev => prev.map(u => (u.id === updated.id ? updated : u)))
-  }
+    const [eventsResult, faResult] = await Promise.all([
+      supabase.from('user_events').select('*').eq('user_id', profile.id).order('date'),
+      supabase.from('family_accounts').select('id').eq('owner_id', profile.id).maybeSingle(),
+    ])
 
-  function addEvent(eventData) {
-    const newEvent = {
-      id: crypto.randomUUID(),
-      userId: user.id,
-      createdAt: new Date().toISOString(),
-      ...eventData,
+    setEvents((eventsResult.data || []).map(normalizeEvent))
+
+    if (faResult.data) {
+      const faId = faResult.data.id
+      setFamilyAccountId(faId)
+      const { data: members } = await supabase
+        .from('family_members')
+        .select('*')
+        .eq('family_account_id', faId)
+      setFamilyMembers((members || []).map(normalizeMember))
     }
-    setEvents(prev => [...prev, newEvent])
-    return newEvent
+
+    setInitializing(false)
   }
 
-  function updateEvent(id, updates) {
-    setEvents(prev => prev.map(e => (e.id === id ? { ...e, ...updates } : e)))
+  // ── Auth ───────────────────────────────────────────────────────────────────
+
+  async function register(userData) {
+    const { data: existing } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('username', userData.username)
+      .maybeSingle()
+
+    if (existing) return { success: false, error: 'Username already taken.' }
+
+    const { data, error } = await supabase.auth.signUp({
+      email:    userData.email,
+      password: userData.password,
+    })
+
+    if (error) return { success: false, error: error.message }
+
+    const { error: profileError } = await supabase.from('user_profiles').insert({
+      auth_id:        data.user.id,
+      username:       userData.username,
+      name:           userData.name,
+      preferred_name: userData.preferredName || userData.name.split(' ')[0],
+      email:          userData.email,
+      phone_number:   userData.phoneNumber || '',
+      timezone:       Intl.DateTimeFormat().resolvedOptions().timeZone,
+    })
+
+    if (profileError) return { success: false, error: profileError.message }
+
+    // Keep pendingUser so ConfirmPage has the email to display.
+    // onAuthStateChange clears it once the session is confirmed.
+    setPendingUser({ email: userData.email })
+
+    return { success: true }
   }
 
-  function deleteEvent(id) {
-    const target = events.find(e => e.id === id)
-    if (target) {
-      setDeletedEvents(prev => [...prev, { ...target, deletedAt: new Date().toISOString() }])
-      setEvents(prev => prev.filter(e => e.id !== id))
+  async function login(usernameOrEmail, password) {
+    let email = usernameOrEmail
+
+    if (!usernameOrEmail.includes('@')) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('email')
+        .eq('username', usernameOrEmail)
+        .maybeSingle()
+
+      if (!profile) return { success: false, error: 'Invalid username or password.' }
+      email = profile.email
     }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return { success: false, error: 'Invalid username/email or password.' }
+    return { success: true }
   }
 
-  function restoreEvent(id) {
-    const target = deletedEvents.find(e => e.id === id)
-    if (target) {
-      const { deletedAt, ...restored } = target
-      setEvents(prev => [...prev, restored])
-      setDeletedEvents(prev => prev.filter(e => e.id !== id))
+  async function logout() {
+    await supabase.auth.signOut()
+    // State cleared by onAuthStateChange
+  }
+
+  async function updateProfile(updates) {
+    const dbUpdates = {}
+    if (updates.name                 !== undefined) dbUpdates.name                  = updates.name
+    if (updates.preferredName        !== undefined) dbUpdates.preferred_name        = updates.preferredName
+    if (updates.username             !== undefined) dbUpdates.username              = updates.username
+    if (updates.phoneNumber          !== undefined) dbUpdates.phone_number          = updates.phoneNumber
+    if (updates.profilePic           !== undefined) dbUpdates.profile_pic           = updates.profilePic
+    if (updates.timezone             !== undefined) dbUpdates.timezone              = updates.timezone
+    if (updates.notificationsEnabled !== undefined) dbUpdates.notifications_enabled = updates.notificationsEnabled
+    if (updates.notificationMethod   !== undefined) dbUpdates.notification_method   = updates.notificationMethod
+    if (updates.isFamilyAccount      !== undefined) dbUpdates.is_family_account     = updates.isFamilyAccount
+
+    if (updates.email && updates.email !== user.email) {
+      const { error: authError } = await supabase.auth.updateUser({ email: updates.email })
+      if (authError) return { success: false, error: authError.message }
+      dbUpdates.email = updates.email
     }
+
+    if (Object.keys(dbUpdates).length === 0) return { success: true }
+
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update(dbUpdates)
+      .eq('id', user.id)
+      .select()
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    setUser(normalizeProfile(data))
+    return { success: true }
   }
 
-  function emptyLitterBox() {
-    setDeletedEvents(prev => prev.filter(e => e.userId !== user?.id))
+  // ── Events ─────────────────────────────────────────────────────────────────
+
+  async function addEvent(eventData) {
+    const { data, error } = await supabase
+      .from('user_events')
+      .insert({
+        user_id:        user.id,
+        name:           eventData.name,
+        date:           eventData.date,
+        start_time:     eventData.startTime    || null,
+        end_time:       eventData.endTime      || null,
+        event_type:     eventData.eventType    || 'other',
+        notify_options: eventData.notifyOptions || null,
+        family_visible: eventData.familyVisible || false,
+        note:           eventData.note         || null,
+      })
+      .select()
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    const normalized = normalizeEvent(data)
+    setEvents(prev => [...prev, normalized])
+    return { success: true, event: normalized }
   }
+
+  async function updateEvent(id, updates) {
+    const dbUpdates = {}
+    if (updates.name          !== undefined) dbUpdates.name           = updates.name
+    if (updates.date          !== undefined) dbUpdates.date           = updates.date
+    if (updates.startTime     !== undefined) dbUpdates.start_time     = updates.startTime
+    if (updates.endTime       !== undefined) dbUpdates.end_time       = updates.endTime
+    if (updates.eventType     !== undefined) dbUpdates.event_type     = updates.eventType
+    if (updates.notifyOptions !== undefined) dbUpdates.notify_options = updates.notifyOptions
+    if (updates.familyVisible !== undefined) dbUpdates.family_visible = updates.familyVisible
+    if (updates.note          !== undefined) dbUpdates.note           = updates.note
+
+    const { data, error } = await supabase
+      .from('user_events')
+      .update(dbUpdates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    const normalized = normalizeEvent(data)
+    setEvents(prev => prev.map(e => e.id === id ? normalized : e))
+    return { success: true }
+  }
+
+  async function deleteEvent(id) {
+    const { data, error } = await supabase
+      .from('user_events')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    setEvents(prev => prev.map(e => e.id === id ? normalizeEvent(data) : e))
+    return { success: true }
+  }
+
+  async function restoreEvent(id) {
+    const { data, error } = await supabase
+      .from('user_events')
+      .update({ deleted_at: null })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    setEvents(prev => prev.map(e => e.id === id ? normalizeEvent(data) : e))
+    return { success: true }
+  }
+
+  async function emptyLitterBox() {
+    const { error } = await supabase
+      .from('user_events')
+      .delete()
+      .eq('user_id', user.id)
+      .not('deleted_at', 'is', null)
+
+    if (error) return { success: false, error: error.message }
+    setEvents(prev => prev.filter(e => !e.deletedAt))
+    return { success: true }
+  }
+
+  // ── Family ─────────────────────────────────────────────────────────────────
+
+  async function ensureFamilyAccount() {
+    if (familyAccountId) return familyAccountId
+
+    const { data, error } = await supabase
+      .from('family_accounts')
+      .insert({ owner_id: user.id })
+      .select('id')
+      .single()
+
+    if (error) return null
+    setFamilyAccountId(data.id)
+    return data.id
+  }
+
+  async function addFamilyMember(memberData) {
+    const faId = await ensureFamilyAccount()
+    if (!faId) return { success: false, error: 'Could not create family account.' }
+
+    const { data, error } = await supabase
+      .from('family_members')
+      .insert({
+        family_account_id:     faId,
+        name:                  memberData.name,
+        email:                 memberData.email  || null,
+        phone:                 memberData.phone  || null,
+        notifications_enabled: memberData.notificationsEnabled || false,
+      })
+      .select()
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    const normalized = normalizeMember(data)
+    setFamilyMembers(prev => [...prev, normalized])
+    return { success: true, member: normalized }
+  }
+
+  async function removeFamilyMember(id) {
+    const { error } = await supabase.from('family_members').delete().eq('id', id)
+    if (error) return { success: false, error: error.message }
+    setFamilyMembers(prev => prev.filter(m => m.id !== id))
+    return { success: true }
+  }
+
+  // ── Prefs & cat fact ───────────────────────────────────────────────────────
 
   function updatePrefs(updates) {
     const next = { ...prefs, ...updates }
@@ -158,64 +388,31 @@ export function AppProvider({ children }) {
     }
   }
 
-  // Creates a full user account without setting pendingUser/user — used for family member creation
-  function registerFamilyMember(userData) {
-    const dup = users.find(
-      u => u.username === userData.username || u.email === userData.email
-    )
-    if (dup) {
-      return {
-        success: false,
-        error: dup.username === userData.username ? 'Username already taken.' : 'Email already in use.',
-      }
-    }
-    const newUser = {
-      id: crypto.randomUUID(),
-      name: userData.name,
-      preferredName: userData.name.split(' ')[0],
-      username: userData.username,
-      email: userData.email,
-      password: userData.password,
-      phoneNumber: '',
-      profilePic: '🐱',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      notificationsEnabled: false,
-      notificationMethod: 'email',
-      isFamilyAccount: false,
-    }
-    setUsers(prev => [...prev, newUser])
-    return { success: true, newUser }
+  function getDailyCatFact() {
+    const today = new Date().toDateString()
+    if (catFactDate === today && catFact) return catFact
+    const idx  = Math.floor(Math.random() * CAT_FACTS.length)
+    const fact = CAT_FACTS[idx]
+    setCatFactDate(today)
+    setCatFact(fact)
+    return fact
   }
 
-  // Looks up a user by credentials without changing auth state — used to link an existing account
-  function lookupUser(usernameOrEmail, password) {
-    return users.find(
-      u => (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password
-    ) || null
-  }
+  // ── Derived state ──────────────────────────────────────────────────────────
 
-  function addFamilyMember(memberData) {
-    const member = { id: crypto.randomUUID(), ownerId: user.id, ...memberData }
-    setFamilyMembers(prev => [...prev, member])
-    return member
-  }
-
-  function removeFamilyMember(id) {
-    setFamilyMembers(prev => prev.filter(m => m.id !== id))
-  }
-
-  const userEvents        = user ? events.filter(e => e.userId === user.id)        : []
-  const userDeletedEvents = user ? deletedEvents.filter(e => e.userId === user.id) : []
+  const userEvents    = events.filter(e => !e.deletedAt)
+  const deletedEvents = events.filter(e => !!e.deletedAt)
 
   return (
     <AppContext.Provider value={{
-      user, pendingUser, events, userEvents, familyMembers, prefs,
-      deletedEvents: userDeletedEvents,
-      catFact, catFactDate,
+      user, pendingUser, initializing,
+      userEvents, deletedEvents, familyMembers,
+      prefs, catFact, catFactDate,
       getDailyCatFact,
-      register, confirmRegistration, login, logout, updateProfile,
-      addEvent, updateEvent, deleteEvent, restoreEvent, emptyLitterBox, updatePrefs,
-      addFamilyMember, removeFamilyMember, registerFamilyMember, lookupUser,
+      register, login, logout, updateProfile,
+      addEvent, updateEvent, deleteEvent, restoreEvent, emptyLitterBox,
+      updatePrefs,
+      addFamilyMember, removeFamilyMember,
     }}>
       {children}
     </AppContext.Provider>
