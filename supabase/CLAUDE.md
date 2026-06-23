@@ -4,30 +4,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Supabase backend for **Kitty Day Calendar** — a cat-themed calendar SPA. This directory holds the Supabase CLI project. It is currently linked to the hosted project but has no local `config.toml`, migrations, or Edge Functions yet.
+Supabase backend for **Kitty Day Calendar** — a cat-themed calendar SPA. This directory holds the Supabase CLI project, already linked to the hosted project. No local `config.toml`, migrations, or Edge Functions exist yet.
 
 **Linked project:** `Kitty Day Calendar` (ref: `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17)
 
 The frontend lives at `../Kitty_Day_Calender/`. All state is currently in-memory in the frontend — nothing persists to Supabase yet.
 
+## Directory layout
+
+```
+supabase/          ← this repo root (working directory)
+├── reference/
+│   ├── Kitty_Day_Calendar.sql   # original MySQL-syntax schema (reference only)
+│   └── Kitty_Day_Calendar.webp  # ERD screenshot
+└── supabase/      ← Supabase CLI project root (run CLI commands from here)
+    └── .temp/     # linked project metadata (project-ref, versions)
+```
+
 ## Supabase CLI commands
 
-The Supabase CLI is not yet installed. Once installed (`brew install supabase/tap/supabase` or via npm: `npx supabase`), the commands run from inside the `supabase/` subdirectory:
+The CLI is available via `npx supabase` (v2.107.0) and the project is already linked. Run all commands from inside the `supabase/supabase/` subdirectory:
 
 ```bash
-supabase login                        # authenticate
-supabase link --project-ref ntazfxyuwzqoavsfvdmm   # re-link if needed
-supabase db pull                      # pull remote schema into local migrations
-supabase migration new <name>         # create a new migration file
-supabase db push                      # push local migrations to remote
-supabase functions new <name>         # scaffold an Edge Function
-supabase functions deploy <name>      # deploy an Edge Function
-supabase gen types typescript --local # generate TypeScript types from schema
+npx supabase login                        # authenticate
+npx supabase link --project-ref ntazfxyuwzqoavsfvdmm   # re-link if needed
+npx supabase db pull                      # pull remote schema → local migrations
+npx supabase migration new <name>         # create a new migration file
+npx supabase db push                      # push local migrations to remote
+npx supabase functions new <name>         # scaffold an Edge Function
+npx supabase functions deploy <name>      # deploy an Edge Function
+npx supabase gen types typescript --local # generate TypeScript types from schema
 ```
 
 ## Planned schema
 
-The reference schema lives at `../Client/skeleton/My_Schema_Example.sql` (MySQL backtick syntax). When implementing in Supabase, convert all identifiers to snake_case and use Supabase Auth (`auth.users`) instead of the `Login/Signup` table.
+The reference schema lives at `reference/Kitty_Day_Calendar.sql` (MySQL backtick syntax with spaced identifiers — convert everything to snake_case for Postgres). Use Supabase Auth (`auth.users`) instead of the `Login/Signup` table. The reference schema encodes password fields directly on `User Profile` — ignore those; Auth owns credentials.
 
 **Core tables to create:**
 
