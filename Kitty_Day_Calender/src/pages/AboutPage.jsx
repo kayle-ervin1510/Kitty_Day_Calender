@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import aboutCats from '../assets/about-cats.png'
 
 export default function AboutPage() {
   const navigate = useNavigate()
@@ -6,7 +7,7 @@ export default function AboutPage() {
   return (
     <div className="about-page">
       <div className="about-hero">
-        <span className="about-cat">🐱</span>
+        <img src={aboutCats} alt="A group of kittens" className="about-cat-img" />
         <h1>About Kitty Day Calendar</h1>
       </div>
 

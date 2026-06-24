@@ -36,7 +36,10 @@ export default function Navbar() {
       <nav className="navbar">
         <div className="navbar-inner">
           <NavLink to="/home" className="navbar-brand" onClick={closeMenu}>
-            <span className="brand-icon">{user?.profilePic ?? '🐱'}</span>
+            {user?.profilePic?.startsWith('http')
+              ? <img src={user.profilePic} alt="Profile" className="brand-icon-img" />
+              : <span className="brand-icon">{user?.profilePic ?? '🐱'}</span>
+            }
             Kitty Day Calendar
           </NavLink>
 

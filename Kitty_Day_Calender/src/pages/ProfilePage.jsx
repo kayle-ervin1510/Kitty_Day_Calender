@@ -4,8 +4,9 @@ import { useApp } from '../context/AppContext'
 import { useLocation } from 'react-router-dom'
 
 const CAT_PICS = ['🐱','😸','😺','😻','🙀','😼','😽','🐈','🐈‍⬛','🦁','🐯','🐅']
+const isUrl = str => typeof str === 'string' && str.startsWith('http')
 
-const THEMES = [
+const ALL_THEMES = [
   {
     id: 'light',
     name: 'Light Mode',
@@ -36,10 +37,17 @@ const THEMES = [
     desc: 'Muted natural tones — soft earth, cat-fur warm beige, and quiet greens.',
     swatch: ['#e8dfd0','#7a9a60','#a87850','#c8a870'],
   },
+  {
+    id: 'year-of-cat',
+    name: '🐱 Year of the Cat',
+    desc: 'Limited edition — Vietnamese Tết red, gold, silver, and black. Only available during the Year of the Cat.',
+    swatch: ['#8b0000','#ffd700','#c0c0c0','#0d0000'],
+    limited: true,
+  },
 ]
 
 export default function ProfilePage() {
-  const { user, userEvents, updateProfile, updatePrefs, prefs, changePassword } = useApp()
+  const { user, userEvents, updateProfile, updatePrefs, prefs, changePassword, isYearOfCat } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -58,6 +66,23 @@ export default function ProfilePage() {
   const [notifEnabled, setNotifEnabled] = useState(user?.notificationsEnabled ?? false)
   const [notifMethod,  setNotifMethod]  = useState(user?.notificationMethod   ?? 'email')
   const [prefsMsg,     setPrefsMsg]     = useState('')
+
+  // Profile pic picker mode
+  const [picMode,      setPicMode]      = useState('emoji')   // 'emoji' | 'feline'
+  const [felineUrl,    setFelineUrl]    = useState(null)
+  const [felineLoading,setFelineLoading]= useState(false)
+
+  async function fetchFeline() {
+    setFelineLoading(true)
+    try {
+      const res  = await fetch('https://api.thecatapi.com/v1/images/search', {
+        headers: { 'x-api-key': import.meta.env.VITE_CAT_API_KEY },
+      })
+      const data = await res.json()
+      setFelineUrl(data[0]?.url || null)
+    } catch { /* leave current image */ }
+    finally { setFelineLoading(false) }
+  }
 
   // Security state
   const [newPw,      setNewPw]      = useState('')
@@ -109,7 +134,10 @@ export default function ProfilePage() {
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="profile-hero">
-        <span className="profile-pic-lg">{user?.profilePic ?? '🐱'}</span>
+        {isUrl(user?.profilePic)
+          ? <img src={user.profilePic} alt="Profile" className="profile-pic-lg-img" />
+          : <span className="profile-pic-lg">{user?.profilePic ?? '🐱'}</span>
+        }
         <div>
           <h1>{user?.preferredName ?? user?.name ?? 'My Profile'}</h1>
           <p className="profile-hero-sub">@{user?.username}</p>
@@ -141,18 +169,67 @@ export default function ProfilePage() {
           {/* Profile pic picker */}
           <div className="form-group">
             <label className="form-label">Profile Picture</label>
-            <div className="pic-picker">
-              {CAT_PICS.map(p => (
-                <button
-                  key={p}
-                  type="button"
-                  className={`pic-option${profilePic === p ? ' selected' : ''}`}
-                  onClick={() => setProfilePic(p)}
-                >
-                  {p}
-                </button>
-              ))}
+
+            {/* Mode toggle */}
+            <div className="pic-mode-toggle">
+              <button
+                type="button"
+                className={`chip${picMode === 'emoji' ? ' chip-on' : ''}`}
+                onClick={() => setPicMode('emoji')}
+              >
+                EmotiCat 🐱
+              </button>
+              <button
+                type="button"
+                className={`chip${picMode === 'feline' ? ' chip-on' : ''}`}
+                onClick={() => { setPicMode('feline'); if (!felineUrl) fetchFeline() }}
+              >
+                Find me a Feline 📷
+              </button>
             </div>
+
+            {/* EmotiCat picker */}
+            {picMode === 'emoji' && (
+              <div className="pic-picker">
+                {CAT_PICS.map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    className={`pic-option${profilePic === p ? ' selected' : ''}`}
+                    onClick={() => setProfilePic(p)}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Find me a Feline picker */}
+            {picMode === 'feline' && (
+              <div className="feline-picker">
+                {felineLoading && <p className="feline-loading">🐱 Fetching a feline…</p>}
+                {felineUrl && !felineLoading && (
+                  <>
+                    <img
+                      src={felineUrl}
+                      alt="Cat"
+                      className={`feline-preview${profilePic === felineUrl ? ' feline-selected' : ''}`}
+                    />
+                    <div className="feline-actions">
+                      {profilePic === felineUrl
+                        ? <span className="cat-image-check">✓ Selected</span>
+                        : <button type="button" className="btn btn-primary btn-sm" onClick={() => setProfilePic(felineUrl)}>
+                            Select this cat 🐾
+                          </button>
+                      }
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={fetchFeline}>
+                        Next cat →
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <hr className="divider" />
@@ -210,12 +287,17 @@ export default function ProfilePage() {
           {/* Theme picker */}
           <div className="form-group">
             <label className="form-label">Calendar Theme</label>
+            {isYearOfCat && (
+              <p className="year-of-cat-notice">
+                🐱 It&apos;s the Vietnamese <strong>Year of the Cat</strong>! A limited-edition theme is available for this lunar year.
+              </p>
+            )}
             <div className="theme-grid">
-              {THEMES.map(t => (
+              {ALL_THEMES.filter(t => !t.limited || isYearOfCat).map(t => (
                 <button
                   key={t.id}
                   type="button"
-                  className={`theme-card${prefs.theme === t.id ? ' active' : ''}`}
+                  className={`theme-card${prefs.theme === t.id ? ' active' : ''}${t.limited ? ' theme-card-limited' : ''}`}
                   onClick={() => handleTheme(t.id)}
                 >
                   <div className="theme-swatches">
@@ -224,6 +306,7 @@ export default function ProfilePage() {
                     ))}
                   </div>
                   <span className="theme-name">{t.name}</span>
+                  {t.limited && <span className="theme-limited-badge">Limited 🐱</span>}
                   <span className="theme-desc">{t.desc}</span>
                   {prefs.theme === t.id && <span className="theme-check">✓</span>}
                 </button>

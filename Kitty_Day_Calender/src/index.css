@@ -128,6 +128,32 @@ ul, ol { list-style: none; }
   --btn-danger-text:  #fff;
 }
 
+[data-theme="year-of-cat"] {
+  /* Year of the Cat — Vietnamese Tết: deep red, gold, silver, black */
+  --bg:             #0d0000;
+  --bg-card:        #1a0404;
+  --bg-nav:         #8b0000;
+  --text-primary:   #ffe566;
+  --text-secondary: #c8c8c8;
+  --accent-1:       #ffd700;
+  --accent-2:       #cc0000;
+  --accent-3:       #c0c0c0;
+  --accent-4:       #e8c840;
+  --danger:         #ff3333;
+  --border:         #6b0000;
+  --shadow:         rgba(180, 0, 0, 0.3);
+  --btn-primary-bg:   #cc0000;
+  --btn-primary-text: #ffe566;
+  --btn-danger-bg:    #6b0000;
+  --btn-danger-text:  #ffe566;
+}
+
+[data-theme="year-of-cat"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="year-of-cat"] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(0.6) saturate(2) hue-rotate(330deg);
+  cursor: pointer;
+}
+
 /* ===== BASE ===== */
 html { font-size: 16px; }
 

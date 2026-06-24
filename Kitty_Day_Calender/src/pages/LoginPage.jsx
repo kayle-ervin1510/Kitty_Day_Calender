@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import HttpCatImage from '../components/HttpCatImage'
+
+// Status codes that warrant showing a http.cat image instead of plain text
+const HTTP_ERROR_CODES = new Set([429, 500, 502, 503, 504, 401, 403])
 
 export default function LoginPage() {
   const { login, register, resetPassword } = useApp()
   const navigate = useNavigate()
   const [tab, setTab] = useState('signin')
   const [error, setError] = useState('')
+  const [errorStatus, setErrorStatus] = useState(null)
 
   const [showForgot, setShowForgot] = useState(false)
   const [forgotEmail, setForgotEmail] = useState('')
@@ -36,17 +41,20 @@ export default function LoginPage() {
   async function handleSignIn(e) {
     e.preventDefault()
     setError('')
+    setErrorStatus(null)
     const result = await login(signInForm.usernameOrEmail, signInForm.password)
     if (result.success) {
       navigate('/home')
     } else {
       setError(result.error)
+      setErrorStatus(result.status ?? null)
     }
   }
 
   async function handleSignUp(e) {
     e.preventDefault()
     setError('')
+    setErrorStatus(null)
     if (signUpForm.email !== signUpForm.confirmEmail) {
       setError('Email addresses do not match.')
       return
@@ -64,17 +72,20 @@ export default function LoginPage() {
       navigate('/confirm', { state: { email: signUpForm.email } })
     } else {
       setError(result.error || 'Registration failed.')
+      setErrorStatus(result.status ?? null)
     }
   }
 
   function siField(field, value) {
     setSignInForm(prev => ({ ...prev, [field]: value }))
     setError('')
+    setErrorStatus(null)
   }
 
   function suField(field, value) {
     setSignUpForm(prev => ({ ...prev, [field]: value }))
     setError('')
+    setErrorStatus(null)
   }
 
   function switchTab(next) {
@@ -166,7 +177,14 @@ export default function LoginPage() {
               </form>
             )}
 
-            {error && <p className="form-error">{error}</p>}
+            {error && (
+              <div className="form-error-block">
+                {errorStatus && HTTP_ERROR_CODES.has(errorStatus) && (
+                  <HttpCatImage status={errorStatus} className="form-http-cat" />
+                )}
+                <p className="form-error">{error}</p>
+              </div>
+            )}
             <button type="submit" className="btn btn-primary btn-full btn-lg">
               Sign In 🐾
             </button>
@@ -258,7 +276,14 @@ export default function LoginPage() {
                 required
               />
             </div>
-            {error && <p className="form-error">{error}</p>}
+            {error && (
+              <div className="form-error-block">
+                {errorStatus && HTTP_ERROR_CODES.has(errorStatus) && (
+                  <HttpCatImage status={errorStatus} className="form-http-cat" />
+                )}
+                <p className="form-error">{error}</p>
+              </div>
+            )}
             <button type="submit" className="btn btn-primary btn-full btn-lg">
               Create Account 🐱
             </button>

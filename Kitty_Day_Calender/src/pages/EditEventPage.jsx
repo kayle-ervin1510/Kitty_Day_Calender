@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import oopsCat from '../assets/oops-cat.png'
 import CatImagePicker from '../components/CatImagePicker'
+import HttpCatImage from '../components/HttpCatImage'
 
 function LitterBox() {
   return (
@@ -141,8 +142,8 @@ export default function EditEventPage() {
           <h1>Event Not Found</h1>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-          <p style={{ fontSize: '3rem' }}>😿</p>
-          <p>We couldn&apos;t find that event. It may have already been deleted.</p>
+          <HttpCatImage status={404} className="error-http-cat" />
+          <p style={{ marginTop: '1rem' }}>We couldn&apos;t find that event. It may have already been deleted.</p>
         </div>
       </div>
     )

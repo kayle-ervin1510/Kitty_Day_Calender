@@ -345,8 +345,51 @@
 
 .error-cat { font-size: 4rem; line-height: 1; }
 .error-card h1 { font-size: 1.5rem; font-weight: 700; }
-.error-card p { color: var(--text-secondary); }
+.error-card p  { color: var(--text-secondary); }
+.error-body    { color: var(--text-secondary); font-size: 0.95rem; }
 .error-actions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+
+/* http.cat image — shared between ErrorPage, EditEventPage, and form inline errors */
+.http-cat-img {
+  width: 100%;
+  max-width: 400px;
+  border-radius: var(--radius-md);
+  display: block;
+  margin: 0 auto;
+}
+.error-http-cat {
+  max-width: 360px;
+  margin-bottom: 0.25rem;
+}
+.error-status-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  justify-content: center;
+}
+.error-status-code {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--accent-2);
+  line-height: 1;
+}
+.error-status-msg {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Inline http.cat image inside login/register form errors */
+.form-error-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.form-http-cat {
+  max-width: 220px;
+  border-radius: var(--radius-sm);
+}
 
 /* ===== ABOUT PAGE ===== */
 .about-page {
@@ -362,7 +405,15 @@
   text-align: center;
   padding: 2rem 1rem 0.5rem;
 }
-.about-cat { font-size: 3.5rem; display: block; margin-bottom: 0.6rem; }
+.about-cat-img {
+  width: 260px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 1.25rem;
+  display: block;
+  margin: 0 auto 1.1rem;
+  box-shadow: 0 4px 18px var(--shadow);
+}
 .about-hero h1 { font-size: 1.9rem; font-weight: 700; }
 
 .about-card p {
@@ -464,9 +515,11 @@
 [data-theme="dark"] .oops-cat-img,
 [data-theme="meow-mixer"] .oops-cat-img,
 [data-theme="rainbow"] .oops-cat-img,
+[data-theme="year-of-cat"] .oops-cat-img,
 [data-theme="dark"] .scratch-confirm-img,
 [data-theme="meow-mixer"] .scratch-confirm-img,
-[data-theme="rainbow"] .scratch-confirm-img { mix-blend-mode: normal; }
+[data-theme="rainbow"] .scratch-confirm-img,
+[data-theme="year-of-cat"] .scratch-confirm-img { mix-blend-mode: normal; }
 
 .scratch-confirm-overlay {
   position: fixed;
@@ -1014,7 +1067,14 @@
   gap: 1.25rem;
   padding: 0.75rem 0;
 }
-.profile-pic-lg   { font-size: 4rem; line-height: 1; }
+.profile-pic-lg     { font-size: 4rem; line-height: 1; }
+.profile-pic-lg-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--accent-1);
+}
 .profile-hero h1  { font-size: 1.7rem; font-weight: 700; }
 .profile-hero-sub { color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.2rem; }
 
@@ -1082,6 +1142,32 @@
 .pic-option:hover   { border-color: var(--accent-1); background: var(--bg-card); }
 .pic-option.selected { border-color: var(--accent-1); background: color-mix(in srgb, var(--accent-1) 12%, var(--bg)); }
 
+.pic-mode-toggle { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+
+.feline-picker { display: flex; flex-direction: column; gap: 0.6rem; }
+.feline-loading { color: var(--text-secondary); font-size: 0.9rem; }
+.feline-preview {
+  width: 100%;
+  max-width: 280px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+}
+.feline-preview.feline-selected {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 30%, transparent);
+}
+.feline-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+.brand-icon-img {
+  width: 1.8rem;
+  height: 1.8rem;
+  object-fit: cover;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
 /* Theme grid */
 .theme-grid {
   display: grid;
@@ -1110,6 +1196,31 @@
 .theme-name     { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
 .theme-desc     { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
 .theme-check    { position: absolute; top: 0.5rem; right: 0.6rem; font-size: 0.8rem; color: var(--accent-1); font-weight: 700; }
+
+.theme-card-limited {
+  border-color: #c0a010;
+  background: color-mix(in srgb, #c0a010 6%, var(--bg));
+}
+.theme-card-limited:hover { border-color: #ffd700; }
+.theme-limited-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #8b0000;
+  color: #ffd700;
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.02em;
+}
+.year-of-cat-notice {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid #cc0000;
+  background: color-mix(in srgb, #cc0000 6%, var(--bg-card));
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
 
 .notif-method-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
 

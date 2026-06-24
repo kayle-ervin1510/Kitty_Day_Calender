@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import { getYearOfCatHoliday } from '../lib/yearOfCat'
 import KittyClock from '../components/KittyClock'
 import imgNewYears      from '../assets/federal-holidays/new-years-day.png'
 import imgMlkDay        from '../assets/federal-holidays/mlk-day.png'
@@ -301,7 +302,7 @@ function addDays(y, m, d, n) {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function CalendarPage() {
-  const { user, userEvents, familyMembers, prefs, updatePrefs, getDailyCatFact, deleteEvent } = useApp()
+  const { user, userEvents, familyMembers, prefs, updatePrefs, getDailyCatFact, deleteEvent, saveDailyCatFact, refreshProfile } = useApp()
   const navigate = useNavigate()
 
   const today = new Date()
@@ -323,6 +324,44 @@ export default function CalendarPage() {
   const [clockTime,     setClockTime]     = useState(new Date())
   const [clockExpanded, setClockExpanded] = useState(false)
   const [scratchedName, setScratchedName] = useState(null) // event name just scratched
+
+  // On login, do a one-time profile refresh so we always have the latest dailyCatFact,
+  // even if it was saved in another browser window after this session loaded.
+  useEffect(() => {
+    if (user?.id) refreshProfile()
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore today's cat fact + image — Supabase is authoritative, localStorage is fast-load cache.
+  // Runs whenever dailyCatFact changes (including after the refresh above).
+  useEffect(() => {
+    if (!user) return
+    const todayStr = new Date().toDateString()
+
+    // Try Supabase first (cross-browser)
+    const remote = user?.dailyCatFact
+    if (remote?.date === todayStr && remote?.fact) {
+      setCatFactText(remote.fact)
+      setCatDayImage(remote.img || null)
+      setCatDayImgDate(todayStr)
+      setShowCatFact(true)
+      localStorage.setItem('kdc_cat_fact', JSON.stringify(remote))
+      return
+    }
+
+    // Fall back to localStorage (same-browser fast path)
+    try {
+      const stored = localStorage.getItem('kdc_cat_fact')
+      if (stored) {
+        const { date, fact, img } = JSON.parse(stored)
+        if (date === todayStr && fact) {
+          setCatFactText(fact)
+          setCatDayImage(img || null)
+          setCatDayImgDate(todayStr)
+          setShowCatFact(true)
+        }
+      }
+    } catch { /* ignore malformed data */ }
+  }, [user?.dailyCatFact]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const id = setInterval(() => setClockTime(new Date()), 1000)
@@ -357,6 +396,8 @@ export default function CalendarPage() {
       INTL_HOLIDAYS
         .filter(h => h.month === m && h.day === d)
         .forEach(h => out.push({ ...h, kind: 'intl' }))
+      const yoc = getYearOfCatHoliday(y)
+      if (yoc && yoc.month === m && yoc.day === d) out.push(yoc)
     }
     if (prefs.showCatHolidays) {
       CAT_HOLIDAYS
@@ -369,23 +410,67 @@ export default function CalendarPage() {
   // ── Actions ───────────────────────────────────────────────────────────────
 
   async function handleCatFact() {
+    const todayStr    = new Date().toDateString()
+    const todayEvents = getEventsForDate(today.getFullYear(), today.getMonth(), today.getDate())
+    const isWildDay   = todayEvents.some(e => e.eventType === 'holiday' || e.eventType === 'birthday')
+
+    const WILD_CATS = ['cheetah','tiger','leopard','lion','jaguar','cougar','snow leopard','sand cat','lynx','ocelot']
+    const wildCat   = WILD_CATS[Math.floor(Math.random() * WILD_CATS.length)]
+
+    let fetchedImg = catDayImgDate === todayStr ? catDayImage : null
+
     const [fact] = await Promise.all([
-      getDailyCatFact(),
-      (async () => {
-        const todayStr = new Date().toDateString()
-        if (catDayImgDate === todayStr && catDayImage) return
-        try {
-          const res  = await fetch('https://api.thecatapi.com/v1/images/search', {
-            headers: { 'x-api-key': import.meta.env.VITE_CAT_API_KEY },
+      // ── Fact ────────────────────────────────────────────────────────────────
+      isWildDay
+        ? fetch(`https://api.api-ninjas.com/v1/animals?name=${encodeURIComponent(wildCat)}`, {
+            headers: { 'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY },
           })
-          const data = await res.json()
-          const url  = data[0]?.url
-          if (url) { setCatDayImage(url); setCatDayImgDate(todayStr) }
+            .then(r => r.json())
+            .then(data => {
+              const animal = data?.[0]
+              if (!animal) return `${wildCat}s are magnificent wild cats.`
+              const c    = animal.characteristics || {}
+              const name = animal.name || wildCat
+              if (c.slogan)                   return `${name}: "${c.slogan}"`
+              if (c.top_speed)                return `${name}s can reach speeds of ${c.top_speed}!`
+              if (c.most_distinctive_feature) return `${name}s are known for: ${c.most_distinctive_feature}.`
+              if (c.biggest_threat)           return `The biggest threat to the ${name}: ${c.biggest_threat}.`
+              return `${name}s are magnificent wild cats.`
+            })
+            .catch(() => `${wildCat}s are magnificent wild cats.`)
+        : getDailyCatFact(),
+
+      // ── Image ────────────────────────────────────────────────────────────────
+      (async () => {
+        if (fetchedImg) return
+        try {
+          if (isWildDay) {
+            const res  = await fetch(
+              `https://api.unsplash.com/photos/random?query=${encodeURIComponent(wildCat + ' wild cat')}&orientation=landscape`,
+              { headers: { Authorization: `Client-ID ${import.meta.env.VITE_UNSPLASH_ACCESS_KEY}` } }
+            )
+            const data = await res.json()
+            const url  = data?.urls?.regular
+            if (url) { fetchedImg = url; setCatDayImage(url); setCatDayImgDate(todayStr) }
+          } else {
+            const res  = await fetch('https://api.thecatapi.com/v1/images/search', {
+              headers: { 'x-api-key': import.meta.env.VITE_CAT_API_KEY },
+            })
+            const data = await res.json()
+            const url  = data[0]?.url
+            if (url) { fetchedImg = url; setCatDayImage(url); setCatDayImgDate(todayStr) }
+          }
         } catch { /* keep emoji fallback */ }
       })(),
     ])
+
     setCatFactText(fact)
     setShowCatFact(true)
+
+    // Persist across all browsers via Supabase, and cache locally
+    const payload = { date: todayStr, fact, img: fetchedImg }
+    localStorage.setItem('kdc_cat_fact', JSON.stringify(payload))
+    saveDailyCatFact(todayStr, fact, fetchedImg)
   }
 
   function handleFamilyEvents() {

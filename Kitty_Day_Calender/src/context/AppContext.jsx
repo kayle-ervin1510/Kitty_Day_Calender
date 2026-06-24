@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { isCurrentlyYearOfCat } from '../lib/yearOfCat'
 
 const CAT_FACTS_FALLBACK = [
   'Cats sleep 12–16 hours per day!',
@@ -29,7 +30,8 @@ function normalizeProfile(row) {
     notificationsEnabled: row.notifications_enabled,
     notificationMethod:   row.notification_method,
     isFamilyAccount:      row.is_family_account,
-    theme:                row.theme ?? 'light',
+    theme:                row.theme          ?? 'light',
+    dailyCatFact:         row.daily_cat_fact ?? null,
     createdAt:            row.created_at,
   }
 }
@@ -144,10 +146,13 @@ export function AppProvider({ children }) {
     }
 
     const normalized = normalizeProfile(profile)
-    setUser(normalized)
+    // Year of the Cat theme is only valid during that lunar year — fall back to light otherwise.
+    const savedTheme = normalized.theme
+    const activeTheme = (savedTheme === 'year-of-cat' && !isCurrentlyYearOfCat()) ? 'light' : savedTheme
+    setUser({ ...normalized, theme: activeTheme })
     setPendingUser(null)
-    setPrefs(prev => ({ ...prev, theme: normalized.theme }))
-    document.documentElement.setAttribute('data-theme', normalized.theme)
+    setPrefs(prev => ({ ...prev, theme: activeTheme }))
+    document.documentElement.setAttribute('data-theme', activeTheme)
 
     const [eventsResult, faResult] = await Promise.all([
       supabase.from('user_events').select('*').eq('user_id', profile.id).order('date'),
@@ -196,7 +201,7 @@ export function AppProvider({ children }) {
       },
     })
 
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? 422 }
 
     // Keep pendingUser so ConfirmPage has the email to display.
     // onAuthStateChange clears it once the session is confirmed.
@@ -209,13 +214,13 @@ export function AppProvider({ children }) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback`,
     })
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? 429 }
     return { success: true }
   }
 
   async function changePassword(newPassword) {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? 400 }
     return { success: true }
   }
 
@@ -231,7 +236,7 @@ export function AppProvider({ children }) {
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? 401 }
     return { success: true }
   }
 
@@ -268,7 +273,7 @@ export function AppProvider({ children }) {
       .select()
       .single()
 
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? 400 }
     setUser(normalizeProfile(data))
     return { success: true }
   }
@@ -409,6 +414,27 @@ export function AppProvider({ children }) {
 
   // ── Prefs & cat fact ───────────────────────────────────────────────────────
 
+  async function refreshProfile() {
+    if (!user) return
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    if (data) setUser(normalizeProfile(data))
+  }
+
+  async function saveDailyCatFact(date, fact, img) {
+    const payload = { date, fact, img: img || null }
+    setUser(prev => prev ? { ...prev, dailyCatFact: payload } : prev)
+    if (user) {
+      await supabase
+        .from('user_profiles')
+        .update({ daily_cat_fact: payload })
+        .eq('id', user.id)
+    }
+  }
+
   async function updatePrefs(updates) {
     const next = { ...prefs, ...updates }
     setPrefs(next)
@@ -450,10 +476,11 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       user, pendingUser, initializing,
+      isYearOfCat: isCurrentlyYearOfCat(),
       userEvents, deletedEvents, familyMembers,
       prefs, catFact, catFactDate,
       getDailyCatFact,
-      register, login, logout, resetPassword, changePassword, updateProfile,
+      register, login, logout, resetPassword, changePassword, updateProfile, saveDailyCatFact, refreshProfile,
       addEvent, updateEvent, deleteEvent, restoreEvent, emptyLitterBox,
       updatePrefs,
       addFamilyMember, removeFamilyMember,
