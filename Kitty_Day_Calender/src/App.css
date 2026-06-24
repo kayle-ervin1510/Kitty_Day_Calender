@@ -115,6 +115,7 @@
 }
 
 .logout-modal-emoji { font-size: 3.5rem; line-height: 1; margin: 0; }
+.logout-modal-lucky-cat { width: 140px; height: auto; object-fit: contain; margin: 0 auto; display: block; }
 .logout-modal-title {
   font-size: 1.3rem;
   font-weight: 700;

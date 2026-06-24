@@ -451,20 +451,34 @@ export function AppProvider({ children }) {
 
   async function getDailyCatFact() {
     const today = new Date().toDateString()
+
+    // Return in-memory fact if it's still today's
     if (catFactDate === today && catFact) return catFact
+
+    // Check localStorage so the same fact survives logout/login within the same day
+    try {
+      const stored = JSON.parse(localStorage.getItem('kitty_daily_fact') || 'null')
+      if (stored?.date === today && stored?.fact) {
+        setCatFactDate(today)
+        setCatFact(stored.fact)
+        return stored.fact
+      }
+    } catch { /* ignore parse errors */ }
+
+    // Fetch a fresh fact for today and persist it
+    const persist = (fact) => {
+      setCatFactDate(today)
+      setCatFact(fact)
+      localStorage.setItem('kitty_daily_fact', JSON.stringify({ date: today, fact }))
+      return fact
+    }
 
     try {
       const res  = await fetch('https://cat-fact.herokuapp.com/facts/random?animal_type=cat')
       const data = await res.json()
-      const fact = data?.text || CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)]
-      setCatFactDate(today)
-      setCatFact(fact)
-      return fact
+      return persist(data?.text || CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)])
     } catch {
-      const fact = CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)]
-      setCatFactDate(today)
-      setCatFact(fact)
-      return fact
+      return persist(CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)])
     }
   }
 

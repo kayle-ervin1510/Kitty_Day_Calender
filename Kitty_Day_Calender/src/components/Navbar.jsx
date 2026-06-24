@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import luckyCat from '../assets/lucky-cat.png'
 
 export default function Navbar() {
   const { logout, deletedEvents, user } = useApp()
@@ -132,7 +133,7 @@ export default function Navbar() {
 
             {logoutState === 'goodbye' && (
               <>
-                <p className="logout-modal-emoji">🐾</p>
+                <img src={luckyCat} alt="Lucky cat waving goodbye" className="logout-modal-lucky-cat" />
                 <p className="logout-modal-msg">All right...see you soon!</p>
               </>
             )}

@@ -410,7 +410,24 @@ export default function CalendarPage() {
   // ── Actions ───────────────────────────────────────────────────────────────
 
   async function handleCatFact() {
-    const todayStr    = new Date().toDateString()
+    const todayStr = new Date().toDateString()
+
+    // If today's fact is already cached (in state or localStorage), just show it — no re-fetch
+    if (catFactText && catDayImgDate === todayStr) {
+      setShowCatFact(true)
+      return
+    }
+    try {
+      const stored = JSON.parse(localStorage.getItem('kdc_cat_fact') || 'null')
+      if (stored?.date === todayStr && stored?.fact) {
+        setCatFactText(stored.fact)
+        setCatDayImage(stored.img || null)
+        setCatDayImgDate(todayStr)
+        setShowCatFact(true)
+        return
+      }
+    } catch { /* ignore malformed cache */ }
+
     const todayEvents = getEventsForDate(today.getFullYear(), today.getMonth(), today.getDate())
     const isWildDay   = todayEvents.some(e => e.eventType === 'holiday' || e.eventType === 'birthday')
 
