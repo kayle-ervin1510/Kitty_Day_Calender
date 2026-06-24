@@ -50,7 +50,7 @@ ul, ol { list-style: none; }
 }
 
 [data-theme="rainbow"] {
-  /* Rainbow Mode — bold purples, electric teals, vivid pinks, bright gold */
+  /* Yarnbow Swirl — bold purples, electric teals, vivid pinks, bright gold */
   --bg:             #1a0a2e;
   --bg-card:        #2a1248;
   --bg-nav:         #5c1fa8;
@@ -126,6 +126,32 @@ ul, ol { list-style: none; }
   --btn-primary-text: #fff;
   --btn-danger-bg:    #a85050;
   --btn-danger-text:  #fff;
+}
+
+[data-theme="ode-to-catnip"] {
+  /* Ode to Catnip — olive green, pale pastel green, sea green, pastel yellow, pale gray */
+  --bg:             #f4f5ee;
+  --bg-card:        #eef2e6;
+  --bg-nav:         #6b7c3a;
+  --text-primary:   #2a3018;
+  --text-secondary: #4a5a30;
+  --accent-1:       #1a5c1a;
+  --accent-2:       #6b7c3a;
+  --accent-3:       #d4e8a0;
+  --accent-4:       #a8c8a0;
+  --danger:         #a05030;
+  --border:         #b8c898;
+  --shadow:         rgba(46, 139, 87, 0.15);
+  --btn-primary-bg:   #1a5c1a;
+  --btn-primary-text: #fff;
+  --btn-danger-bg:    #a05030;
+  --btn-danger-text:  #fff;
+}
+
+[data-theme="ode-to-catnip"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="ode-to-catnip"] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: sepia(0.3) saturate(1.2);
+  cursor: pointer;
 }
 
 [data-theme="year-of-cat"] {

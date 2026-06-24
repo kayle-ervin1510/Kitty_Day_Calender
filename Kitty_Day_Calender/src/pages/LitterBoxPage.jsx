@@ -157,7 +157,24 @@ export default function LitterBoxPage() {
             </p>
             <div className="logout-modal-actions">
               <button className="btn btn-danger" onClick={handleClean}>
-                Yes, clean it! 🧹
+                <svg
+                  viewBox="0 0 22 22"
+                  width="15" height="15"
+                  aria-hidden="true"
+                  style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '0.4em', flexShrink: 0 }}
+                >
+                  <line x1="18" y1="2" x2="13" y2="9"
+                    stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  <path
+                    fillRule="evenodd"
+                    fill="currentColor"
+                    d="M3,9 L14,9 L13,18 L4,18 Z
+                       M5.5,11 L7,11 L7,17 L5.5,17 Z
+                       M8,11 L9.5,11 L9.5,17 L8,17 Z
+                       M10.5,11 L12,11 L12,17 L10.5,17 Z"
+                  />
+                </svg>
+                Yes, clean it!
               </button>
               <button className="btn btn-secondary" onClick={() => setConfirmClean(false)}>
                 Not yet

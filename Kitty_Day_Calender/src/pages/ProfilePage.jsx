@@ -21,9 +21,15 @@ const ALL_THEMES = [
   },
   {
     id: 'rainbow',
-    name: 'Rainbow Mode',
+    name: 'Yarnbow Swirl',
     desc: 'Bright, playful colors — bold purples, electric teals, and vivid pinks.',
     swatch: ['#5c1fa8','#e040fb','#00bcd4','#ffeb3b'],
+  },
+  {
+    id: 'ode-to-catnip',
+    name: 'Ode to Catnip',
+    desc: 'Olive greens, sea green, pastel yellow, and pale gray — fresh and herbaceous.',
+    swatch: ['#6b7c3a','#a8c8a0','#1a5c1a','#e8f0a0'],
   },
   {
     id: 'meow-mixer',
@@ -362,7 +368,15 @@ export default function ProfilePage() {
 
           <div className="profile-form-actions">
             <button type="button" className="btn btn-primary" onClick={handleSavePrefs}>
-              Save Preferences 🐾
+              Save Preferences
+              <svg viewBox="0 0 32 32" width="1em" height="1em" aria-hidden="true"
+                style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '0.35em', flexShrink: 0 }}>
+                <ellipse cx="16" cy="22.5" rx="7" ry="5.5" fill="currentColor" />
+                <ellipse cx="7"  cy="14.5" rx="2.8" ry="3.5" fill="currentColor" />
+                <ellipse cx="12" cy="10.5" rx="2.8" ry="3.5" fill="currentColor" />
+                <ellipse cx="20" cy="10.5" rx="2.8" ry="3.5" fill="currentColor" />
+                <ellipse cx="25" cy="14.5" rx="2.8" ry="3.5" fill="currentColor" />
+              </svg>
             </button>
           </div>
 

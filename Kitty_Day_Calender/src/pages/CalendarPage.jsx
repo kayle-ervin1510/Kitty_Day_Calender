@@ -919,10 +919,18 @@ export default function CalendarPage() {
           className={`btn${prefs.showFamilyEvents ? ' btn-toggle-on' : ' btn-secondary'}`}
           onClick={handleFamilyEvents}
         >
-          {prefs.showFamilyEvents ? '✓ Hiding' : 'View All'} Family Events 🐱🐱
+          {prefs.showFamilyEvents ? '✓ Hiding' : 'View'} Family Events
+          <svg viewBox="0 0 32 32" width="1em" height="1em" aria-hidden="true"
+            style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '0.35em', flexShrink: 0 }}>
+            <ellipse cx="16" cy="22.5" rx="7" ry="5.5" fill="currentColor" />
+            <ellipse cx="7"  cy="14.5" rx="2.8" ry="3.5" fill="currentColor" />
+            <ellipse cx="12" cy="10.5" rx="2.8" ry="3.5" fill="currentColor" />
+            <ellipse cx="20" cy="10.5" rx="2.8" ry="3.5" fill="currentColor" />
+            <ellipse cx="25" cy="14.5" rx="2.8" ry="3.5" fill="currentColor" />
+          </svg>
         </button>
         <button className="btn btn-secondary" onClick={handleCatFact}>
-          Give me a Cat Fact! 😺
+          Give me a Cat Fact! 🐈
         </button>
       </div>
 
