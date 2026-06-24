@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext'
 import Navbar from './components/Navbar'
 import LoginPage from './pages/LoginPage'
 import ConfirmPage from './pages/ConfirmPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 import HomePage from './pages/HomePage'
 import CalendarPage from './pages/CalendarPage'
 import AddEventPage from './pages/AddEventPage'
@@ -43,6 +44,11 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
+
+      {/* /auth/callback must NOT be inside PublicLayout — the session isn't
+          set yet when the code arrives, so user==null. PublicLayout would
+          pass through fine, but any initializing guard would block it. */}
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
       <Route element={<PublicLayout />}>
         <Route path="/login" element={<LoginPage />} />
