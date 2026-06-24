@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this app is
 
-**Kitty Day Calendar** — a cat-themed calendar SPA. Users register, create events, and get a daily cat fact. Events are typed as holiday, birthday, or other. Family accounts allow multiple profiles under one login. HTTP error states show cat-coordinated images. Notifications can be sent via email or SMS (planned — not yet wired).
+**Kitty Day Calendar** — a cat-themed calendar SPA. Users register, create events, and get a daily cat fact. Events are typed as holiday, birthday, or other. Family accounts allow multiple profiles under one login. HTTP error states show cat-themed images via `http.cat`. Notifications can be sent via email or SMS (planned — not yet wired).
 
 ## Repository layout
 
@@ -20,7 +20,9 @@ Project_2/
 │   │   ├── App.jsx             # Root — BrowserRouter, AppProvider, all routes
 │   │   ├── context/AppContext.jsx  # All global state + Supabase calls
 │   │   ├── lib/supabase.js     # Supabase client (reads VITE_SUPABASE_* env vars)
-│   │   ├── components/         # Navbar.jsx, KittyClock.jsx
+│   │   ├── lib/httpCat.js      # HTTP status code map + set of codes http.cat supports
+│   │   ├── lib/yearOfCat.js    # Vietnamese zodiac Year of the Cat date ranges
+│   │   ├── components/         # Navbar.jsx, KittyClock.jsx, HttpCatImage.jsx, CatImagePicker.jsx
 │   │   └── pages/              # One file per route (see Routing section)
 │   └── package.json
 └── Main/supabase/              # Backend placeholder — empty, not yet configured
@@ -49,12 +51,17 @@ Place in `Kitty_Day_Calender/.env` (not committed):
 |---|---|
 | `VITE_SUPABASE_URL` | Supabase project REST URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase public anon key |
+| `VITE_CAT_API_KEY` | The Cat API key (used by `CatImagePicker`) |
+| `VITE_UNSPLASH_ACCESS_KEY` | Unsplash API key (used by `CatImagePicker` for wild-cat images) |
+| `VITE_API_NINJAS_KEY` | API Ninjas key (used by `CatImagePicker` for animal facts) |
+
+The three image/fact API keys are optional — `CatImagePicker` degrades gracefully when they are absent.
 
 ## Tech stack
 
 - **Frontend:** React 19 + Vite 8 + React Router DOM v7, plain CSS
 - **Backend:** Supabase (Postgres + Auth) — **fully integrated**
-- **External API:** Animals API — planned, not yet integrated
+- **External APIs:** `cat-fact.herokuapp.com` (live cat facts, with fallback), The Cat API / Unsplash / API Ninjas (event images, optional)
 
 ## Routing (`src/App.jsx`)
 
@@ -66,6 +73,7 @@ Two layout wrappers:
 |---|---|---|
 | `/login` | `LoginPage` | Handles both login and register; public |
 | `/confirm` | `ConfirmPage` | Shows instructions to check email; public |
+| `/reset-password` | `ResetPasswordPage` | Password-reset flow; outside both layouts |
 | `/home` | `HomePage` | Landing after login |
 | `/calendar` | `CalendarPage` | Full calendar UI |
 | `/events/new` | `AddEventPage` | Pre-fills `date` from `?date=YYYY-MM-DD` query param |
@@ -97,31 +105,38 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 | `user` | Logged-in user object (normalized from `user_profiles`), or `null` |
 | `pendingUser` | `{ email }` set after `register()`, cleared by `onAuthStateChange` |
 | `initializing` | `true` until the session check resolves; `ProtectedLayout` returns `null` during this time |
+| `isYearOfCat` | Boolean — whether today falls in a Vietnamese Year of the Cat (from `yearOfCat.js`) |
 | `userEvents` | Events for current user where `deletedAt` is null (derived from `events`) |
 | `deletedEvents` | Events for current user where `deletedAt` is set (the Litter Box) |
 | `familyMembers` | Members from the `family_members` table for the current user's family account |
-| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents, showCatHolidays }` — **in-memory only, not persisted** |
+| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents, showCatHolidays }` |
 | `catFact` / `catFactDate` | Daily cat fact — same fact per calendar day per page session; randomises on page refresh |
 | `register(userData)` | Returns `{ success, error? }` |
 | `login(usernameOrEmail, password)` | Resolves username → email via `get_email_by_username` RPC, then `signInWithPassword`; returns `{ success, error? }` |
 | `logout()` | Calls `supabase.auth.signOut()`; state cleared by `onAuthStateChange` |
+| `resetPassword(email)` | Sends Supabase password-reset email |
+| `changePassword(newPw)` | Calls `supabase.auth.updateUser` with new password |
 | `updateProfile(updates)` | Patches `user_profiles`; also calls `supabase.auth.updateUser` if `email` changes; returns `{ success, error? }` |
+| `refreshProfile()` | Re-fetches `user_profiles` row and updates `user` state |
 | `addEvent(eventData)` | Inserts into `user_events`; returns `{ success, event? }` |
 | `updateEvent(id, updates)` | Updates `user_events` row; returns `{ success, error? }` |
 | `deleteEvent(id)` | Sets `deleted_at` on the `user_events` row (soft delete); returns `{ success, error? }` |
 | `restoreEvent(id)` | Clears `deleted_at` on a soft-deleted event; returns `{ success, error? }` |
 | `emptyLitterBox()` | Hard-deletes all soft-deleted events for current user; returns `{ success, error? }` |
-| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` |
-| `getDailyCatFact()` | Returns same fact for the day within a session; rotates randomly on each page load |
+| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` **and persists to `user_profiles.theme`** |
+| `getDailyCatFact()` | Fetches from `cat-fact.herokuapp.com`; falls back to 10 hardcoded strings on network failure. Same fact returned all day; rotates on page refresh. |
+| `saveDailyCatFact(payload)` | Persists a cat fact string to `user_profiles.daily_cat_fact` |
 | `addFamilyMember(memberData)` | Creates `family_accounts` row if needed, then inserts into `family_members`; returns `{ success, member? }` |
 | `removeFamilyMember(id)` | Deletes from `family_members`; returns `{ success, error? }` |
+
+**Theme persistence:** `theme` is stored in `user_profiles.theme` and loaded on session restore. The special `year-of-cat` theme is automatically downgraded to `light` when `isCurrentlyYearOfCat()` returns false.
 
 ## Supabase tables
 
 | Table | Key columns |
 |---|---|
-| `user_profiles` | `id`, `auth_id` (FK to `auth.users`), `username`, `name`, `preferred_name`, `email`, `phone_number`, `profile_pic`, `timezone`, `notifications_enabled`, `notification_method`, `is_family_account`, `created_at` |
-| `user_events` | `id`, `user_id` (FK to `user_profiles`), `name`, `date`, `start_time`, `end_time`, `event_type`, `notify_options`, `family_visible`, `note`, `deleted_at`, `created_at` |
+| `user_profiles` | `id`, `auth_id` (FK to `auth.users`), `username`, `name`, `preferred_name`, `email`, `phone_number`, `profile_pic`, `timezone`, `notifications_enabled`, `notification_method`, `is_family_account`, `theme`, `daily_cat_fact`, `created_at` |
+| `user_events` | `id`, `user_id` (FK to `user_profiles`), `name`, `date`, `start_time`, `end_time`, `event_type`, `notify_options`, `family_visible`, `note`, `image_url`, `deleted_at`, `created_at` |
 | `family_accounts` | `id`, `owner_id` (FK to `user_profiles`) |
 | `family_members` | `id`, `family_account_id`, `name`, `email`, `phone`, `notifications_enabled`, `created_at` |
 
@@ -133,14 +148,22 @@ A DB trigger on `auth.users` INSERT creates the `user_profiles` row from auth me
 
 - **`Navbar.jsx`** — rendered by `ProtectedLayout`. Shows a Litter Box badge when `deletedEvents.length > 0`. Logout uses a three-state modal (`confirming` → `goodbye` / `staying`).
 - **`KittyClock.jsx`** — SVG cat-face clock rendered on `CalendarPage`. Props: `clockTime`, `expanded`, `onToggle`. Collapsed shows sleepy eyes + digital HH:MM; expanded shows wide eyes + seconds hand + timezone.
+- **`HttpCatImage.jsx`** — renders an `<img>` from `https://http.cat/{status}`. Falls back to 404 if the code isn't in the supported set (`httpCat.js`). Used by `LoginPage`, `EditEventPage`, and `ErrorPage`.
+- **`CatImagePicker.jsx`** — lets users attach a cat image to an event. For `holiday`/`birthday` types, fetches a wild-cat photo (Unsplash) + animal fact (API Ninjas); for `other`, fetches a domestic-cat photo (The Cat API). Used by `AddEventPage` and `EditEventPage`.
+
+## Lib utilities (`src/lib/`)
+
+- **`supabase.js`** — Supabase JS client, reads `VITE_SUPABASE_*` env vars.
+- **`httpCat.js`** — `HTTP_STATUS_MESSAGES` map and `HTTP_CAT_SUPPORTED` set. Import both when rendering HTTP status UI.
+- **`yearOfCat.js`** — `isCurrentlyYearOfCat()` (boolean) and `getYearOfCatHoliday(calYear)` (returns holiday object or null). `CalendarPage` calls `getYearOfCatHoliday` when building its holiday list; `AppContext` calls `isCurrentlyYearOfCat` to guard the `year-of-cat` theme.
 
 ## CalendarPage details
 
-Three views (`month`, `week`, `day`) with prev/next navigation; clicking a month or week cell drills into day view. Federal holidays computed dynamically per year via weekday-offset math (`getFederalHolidays`). International holidays are a hardcoded fixed-date list (`INTL_HOLIDAYS`). Both toggled via `prefs`. A live clock ticks via `setInterval` and drives `KittyClock`.
+Three views (`month`, `week`, `day`) with prev/next navigation; clicking a month or week cell drills into day view. Federal holidays computed dynamically per year via weekday-offset math (`getFederalHolidays`). International holidays are a hardcoded fixed-date list (`INTL_HOLIDAYS`). Both toggled via `prefs`. Vietnamese Year of the Cat start date added when `prefs.showCatHolidays` is on. A live clock ticks via `setInterval` and drives `KittyClock`.
 
 ## Event data shape
 
-`{ id, userId, createdAt, name, date (YYYY-MM-DD), startTime, endTime, eventType ('holiday'|'birthday'|'other'), notifyOptions, familyVisible, note, deletedAt }`
+`{ id, userId, createdAt, name, date (YYYY-MM-DD), startTime, endTime, eventType ('holiday'|'birthday'|'other'), notifyOptions, familyVisible, note, imageUrl, deletedAt }`
 
 ## Styling
 
@@ -167,16 +190,16 @@ Available themes (set in `ProfilePage`, applied by `updatePrefs`):
 | `rainbow` | Bold purples, electric teals, vivid pinks, bright gold |
 | `meow-mixer` | Rich orange, dark green, tanned brown, deep earthy tones |
 | `mewture` | Muted natural tones — soft earth, warm beige, quiet greens |
+| `year-of-cat` | Special theme; auto-downgrades to `light` outside Vietnamese Year of the Cat dates |
 
 Shared utility classes: `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-sm`, `.btn-lg`, `.btn-full`, `.card`, `.form-group`, `.form-error`, `.badge`, `.badge-event`, `.badge-holiday`, `.badge-birthday`, `.divider`, `.page-title`, `.page-subtitle`, `.cat-fact-banner`.
 
 ## Planned features not yet implemented
 
-- Animals API integration (cat images for events, profile pictures, error pages)
 - Email / SMS notifications (toggle exists in `ProfilePage`; nothing is wired)
 - Notification timing options (2 days prior, day-of)
 - Allow Permissions page (currently a button stub on `HomePage`)
-- `prefs` persistence to Supabase
+- `prefs` fields other than `theme` not yet persisted to Supabase
 
 ## Schema reference
 
