@@ -39,6 +39,7 @@ function normalizeProfile(row) {
     notificationsEnabled: row.notifications_enabled,
     notificationMethod:   row.notification_method,
     isFamilyAccount:      row.is_family_account,
+    theme:                row.theme ?? 'light',
     createdAt:            row.created_at,
   }
 }
@@ -151,8 +152,11 @@ export function AppProvider({ children }) {
       return
     }
 
-    setUser(normalizeProfile(profile))
+    const normalized = normalizeProfile(profile)
+    setUser(normalized)
     setPendingUser(null)
+    setPrefs(prev => ({ ...prev, theme: normalized.theme }))
+    document.documentElement.setAttribute('data-theme', normalized.theme)
 
     const [eventsResult, faResult] = await Promise.all([
       supabase.from('user_events').select('*').eq('user_id', profile.id).order('date'),
@@ -210,6 +214,20 @@ export function AppProvider({ children }) {
     return { success: true }
   }
 
+  async function resetPassword(email) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    })
+    if (error) return { success: false, error: error.message }
+    return { success: true }
+  }
+
+  async function changePassword(newPassword) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) return { success: false, error: error.message }
+    return { success: true }
+  }
+
   async function login(usernameOrEmail, password) {
     let email = usernameOrEmail
 
@@ -228,6 +246,7 @@ export function AppProvider({ children }) {
 
   async function logout() {
     await supabase.auth.signOut()
+    document.documentElement.setAttribute('data-theme', 'light')
     // State cleared by onAuthStateChange
   }
 
@@ -397,11 +416,17 @@ export function AppProvider({ children }) {
 
   // ── Prefs & cat fact ───────────────────────────────────────────────────────
 
-  function updatePrefs(updates) {
+  async function updatePrefs(updates) {
     const next = { ...prefs, ...updates }
     setPrefs(next)
     if (updates.theme) {
       document.documentElement.setAttribute('data-theme', updates.theme)
+      if (user) {
+        await supabase
+          .from('user_profiles')
+          .update({ theme: updates.theme })
+          .eq('id', user.id)
+      }
     }
   }
 
@@ -426,7 +451,7 @@ export function AppProvider({ children }) {
       userEvents, deletedEvents, familyMembers,
       prefs, catFact, catFactDate,
       getDailyCatFact,
-      register, login, logout, updateProfile,
+      register, login, logout, resetPassword, changePassword, updateProfile,
       addEvent, updateEvent, deleteEvent, restoreEvent, emptyLitterBox,
       updatePrefs,
       addFamilyMember, removeFamilyMember,

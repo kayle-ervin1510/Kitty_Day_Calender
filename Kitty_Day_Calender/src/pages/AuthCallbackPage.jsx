@@ -17,9 +17,16 @@ export default function AuthCallbackPage() {
     supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
       if (err) {
         setError(err.message)
+        return
       }
-      // On success, onAuthStateChange fires in AppContext, sets user,
-      // and ProtectedLayout redirects to /home automatically.
+      // PASSWORD_RECOVERY sessions need the user to set a new password first.
+      // All other sessions (email confirm, OAuth) let ProtectedLayout redirect to /home.
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          subscription.unsubscribe()
+          navigate('/reset-password', { replace: true })
+        }
+      })
     })
   }, [navigate])
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import { useLocation } from 'react-router-dom'
 
 const CAT_PICS = ['🐱','😸','😺','😻','🙀','😼','😽','🐈','🐈‍⬛','🦁','🐯','🐅']
 
@@ -38,10 +39,11 @@ const THEMES = [
 ]
 
 export default function ProfilePage() {
-  const { user, userEvents, updateProfile, updatePrefs, prefs } = useApp()
+  const { user, userEvents, updateProfile, updatePrefs, prefs, changePassword } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
 
-  const [tab, setTab] = useState('profile')
+  const [tab, setTab] = useState(location.state?.tab ?? 'profile')
 
   // Profile edit state
   const [name,        setName]        = useState(user?.name        ?? '')
@@ -56,6 +58,27 @@ export default function ProfilePage() {
   const [notifEnabled, setNotifEnabled] = useState(user?.notificationsEnabled ?? false)
   const [notifMethod,  setNotifMethod]  = useState(user?.notificationMethod   ?? 'email')
   const [prefsMsg,     setPrefsMsg]     = useState('')
+
+  // Security state
+  const [newPw,      setNewPw]      = useState('')
+  const [confirmPw,  setConfirmPw]  = useState('')
+  const [securityMsg,   setSecurityMsg]   = useState('')
+  const [securityError, setSecurityError] = useState('')
+
+  async function handleChangePassword(e) {
+    e.preventDefault()
+    setSecurityMsg('')
+    setSecurityError('')
+    if (newPw.length < 6) { setSecurityError('Password must be at least 6 characters.'); return }
+    if (newPw !== confirmPw) { setSecurityError('Passwords do not match.'); return }
+    const result = await changePassword(newPw)
+    if (result.success) {
+      setSecurityMsg('Password updated! 🐾')
+      setNewPw(''); setConfirmPw('')
+    } else {
+      setSecurityError(result.error)
+    }
+  }
 
   function handleSaveProfile(e) {
     e.preventDefault()
@@ -99,6 +122,7 @@ export default function ProfilePage() {
           { id: 'profile',  label: 'Profile' },
           { id: 'prefs',    label: 'Preferences' },
           { id: 'events',   label: `My Events (${userEvents.length})` },
+          { id: 'security', label: 'Security' },
         ].map(t => (
           <button
             key={t.id}
@@ -307,6 +331,44 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* ── Security tab ────────────────────────────────────────────────── */}
+      {tab === 'security' && (
+        <form className="card profile-form" onSubmit={handleChangePassword}>
+          <h2 style={{ marginBottom: '1rem' }}>Change Password</h2>
+
+          <div className="form-group">
+            <label htmlFor="sec-new">New Password</label>
+            <input
+              id="sec-new"
+              type="password"
+              placeholder="At least 6 characters"
+              value={newPw}
+              onChange={e => setNewPw(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="sec-cnew">Confirm New Password</label>
+            <input
+              id="sec-cnew"
+              type="password"
+              placeholder="Re-enter your new password"
+              value={confirmPw}
+              onChange={e => setConfirmPw(e.target.value)}
+              required
+            />
+          </div>
+
+          {securityError && <p className="form-error">{securityError}</p>}
+          {securityMsg   && <p className="form-success">{securityMsg}</p>}
+
+          <div className="profile-form-actions">
+            <button type="submit" className="btn btn-primary">Update Password 🔐</button>
+          </div>
+        </form>
       )}
 
     </div>

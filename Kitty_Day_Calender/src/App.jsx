@@ -13,6 +13,7 @@ import FamilyPage from './pages/FamilyPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import LitterBoxPage from './pages/LitterBoxPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import ErrorPage from './pages/ErrorPage'
 import './App.css'
 
@@ -49,6 +50,7 @@ function AppRoutes() {
           set yet when the code arrives, so user==null. PublicLayout would
           pass through fine, but any initializing guard would block it. */}
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route element={<PublicLayout />}>
         <Route path="/login" element={<LoginPage />} />
