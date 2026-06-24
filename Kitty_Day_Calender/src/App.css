@@ -641,6 +641,21 @@
 }
 .cal-cat-emoji  { font-size: 2.5rem; line-height: 1; }
 .cal-cat-date   { font-size: 0.75rem; color: var(--text-secondary); text-align: center; }
+.cal-cat-card-expanded { min-width: 180px; max-width: 220px; }
+.cal-cat-img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+.cal-cat-fact {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+  font-style: italic;
+}
 
 .kitty-clock-svg {
   width: 120px;
@@ -919,6 +934,14 @@
 .cal-day-event-info { display: flex; flex-direction: column; gap: 3px; }
 .cal-day-event-name { font-weight: 600; font-size: 0.92rem; }
 .cal-day-event-time { font-size: 0.8rem; color: var(--text-secondary); }
+.cal-day-event-img {
+  width: 100%;
+  max-width: 320px;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-top: 0.5rem;
+}
 
 .cal-event-btns {
   display: flex;
@@ -1473,6 +1496,57 @@
 }
 .event-image-cat  { font-size: 2.5rem; line-height: 1; }
 .event-image-note { font-size: 0.8rem; color: var(--text-secondary); font-style: italic; }
+
+/* ── CatImagePicker ────────────────────────────────────────────────────────── */
+.cat-image-picker { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.cat-image-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.cat-image-spinner { font-size: 1.4rem; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.cat-image-result { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.cat-image-preview {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+}
+.cat-image-preview.cat-image-selected {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 30%, transparent);
+}
+
+.cat-image-fact {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border-left: 3px solid var(--accent-2);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 0;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.cat-image-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.cat-image-check {
+  font-size: 0.9rem;
+  color: var(--accent-2);
+  font-weight: 600;
+}
 
 .event-form-actions {
   display: flex;

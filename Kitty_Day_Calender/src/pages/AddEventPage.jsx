@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import CatImagePicker from '../components/CatImagePicker'
 
 const NOTIFY_OPTIONS = [
   { value: '15min',  label: '15 minutes before' },
@@ -30,6 +31,7 @@ export default function AddEventPage() {
   const [customDate,   setCustomDate]   = useState('')
   const [customTime,   setCustomTime]   = useState('')
   const [eventType,  setEventType]  = useState('other')   // 'other' | 'holiday' | 'birthday'
+  const [imageUrl,   setImageUrl]   = useState(null)
   const [isPublic,   setIsPublic]   = useState(false)
   const [error,      setError]      = useState('')
   const [saved,      setSaved]      = useState(false)
@@ -60,6 +62,7 @@ export default function AddEventPage() {
           : { date: customDate, time: customTime }),
       } : null,
       eventType,
+      imageUrl,
       isPublic,
     })
 
@@ -260,13 +263,16 @@ export default function AddEventPage() {
           </div>
         </div>
 
-        {/* Cat image placeholder */}
+        {/* Cat image picker */}
         <div className="form-group">
-          <label className="form-label">Add Image 🐱</label>
-          <div className="event-image-placeholder">
-            <span className="event-image-cat">😺</span>
-            <span className="event-image-note">Cat images coming soon!</span>
-          </div>
+          <label className="form-label">
+            {eventType === 'other' ? 'Add Image 🐱' : 'Add Image 🐆'}
+          </label>
+          <CatImagePicker
+            eventType={eventType}
+            value={imageUrl}
+            onChange={setImageUrl}
+          />
         </div>
 
         {/* Public to family */}

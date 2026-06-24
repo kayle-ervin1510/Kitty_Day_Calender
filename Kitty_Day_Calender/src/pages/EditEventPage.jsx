@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import oopsCat from '../assets/oops-cat.png'
+import CatImagePicker from '../components/CatImagePicker'
 
 function LitterBox() {
   return (
@@ -75,6 +76,7 @@ export default function EditEventPage() {
   const [customDate,   setCustomDate]   = useState(event?.customNotify?.date   ?? '')
   const [customTime,   setCustomTime]   = useState(event?.customNotify?.time   ?? '')
   const [eventType,  setEventType]  = useState(event?.eventType  ?? 'other')
+  const [imageUrl,   setImageUrl]   = useState(event?.imageUrl   ?? null)
   const [isPublic,   setIsPublic]   = useState(event?.isPublic   ?? false)
   const [error,      setError]      = useState('')
 
@@ -107,6 +109,7 @@ export default function EditEventPage() {
           : { date: customDate, time: customTime }),
       } : null,
       eventType,
+      imageUrl,
       isPublic,
     })
 
@@ -324,11 +327,14 @@ export default function EditEventPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Add Image 🐱</label>
-            <div className="event-image-placeholder">
-              <span className="event-image-cat">😺</span>
-              <span className="event-image-note">Cat images coming soon!</span>
-            </div>
+            <label className="form-label">
+              {eventType === 'other' ? 'Add Image 🐱' : 'Add Image 🐆'}
+            </label>
+            <CatImagePicker
+              eventType={eventType}
+              value={imageUrl}
+              onChange={setImageUrl}
+            />
           </div>
 
           <div className="form-group">

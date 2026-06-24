@@ -317,6 +317,8 @@ export default function CalendarPage() {
   const [calView,      setCalView]      = useState('month') // 'month'|'week'|'day'
   const [showCatFact,   setShowCatFact]   = useState(false)
   const [catFactText,   setCatFactText]   = useState('')
+  const [catDayImage,   setCatDayImage]   = useState(null)
+  const [catDayImgDate, setCatDayImgDate] = useState(null)
   const [showFamilyMsg, setShowFamilyMsg] = useState(false)
   const [clockTime,     setClockTime]     = useState(new Date())
   const [clockExpanded, setClockExpanded] = useState(false)
@@ -367,7 +369,21 @@ export default function CalendarPage() {
   // ── Actions ───────────────────────────────────────────────────────────────
 
   async function handleCatFact() {
-    const fact = await getDailyCatFact()
+    const [fact] = await Promise.all([
+      getDailyCatFact(),
+      (async () => {
+        const todayStr = new Date().toDateString()
+        if (catDayImgDate === todayStr && catDayImage) return
+        try {
+          const res  = await fetch('https://api.thecatapi.com/v1/images/search', {
+            headers: { 'x-api-key': import.meta.env.VITE_CAT_API_KEY },
+          })
+          const data = await res.json()
+          const url  = data[0]?.url
+          if (url) { setCatDayImage(url); setCatDayImgDate(todayStr) }
+        } catch { /* keep emoji fallback */ }
+      })(),
+    ])
     setCatFactText(fact)
     setShowCatFact(true)
   }
@@ -601,6 +617,13 @@ export default function CalendarPage() {
                   {e.eventType && e.eventType !== 'other' && (
                     <span className={`badge badge-${e.eventType}`}>{e.eventType}</span>
                   )}
+                  {e.imageUrl && (
+                    <img
+                      src={e.imageUrl}
+                      alt={e.name}
+                      className="cal-day-event-img"
+                    />
+                  )}
                 </div>
                 <div className="cal-event-btns">
                   <button
@@ -663,16 +686,6 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* Cat Fact Banner */}
-      {showCatFact && (
-        <div className="cat-fact-banner">
-          <div className="fact-emoji">🐱</div>
-          <p>{catFactText}</p>
-          <button className="btn btn-sm btn-secondary" onClick={() => setShowCatFact(false)}>
-            Got it! 🐾
-          </button>
-        </div>
-      )}
 
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="cal-header">
@@ -683,11 +696,17 @@ export default function CalendarPage() {
 
         <div className="cal-header-right">
           <div className="cal-header-cards">
-            <div className="cal-cat-card">
-              <span className="cal-cat-emoji">🐱</span>
+            <div className={`cal-cat-card${showCatFact ? ' cal-cat-card-expanded' : ''}`}>
+              {showCatFact && catDayImage
+                ? <img src={catDayImage} alt="Daily cat" className="cal-cat-img" />
+                : <span className="cal-cat-emoji">🐱</span>
+              }
               <span className="cal-cat-date">
                 {MONTH_NAMES[today.getMonth()]} {today.getDate()}, {today.getFullYear()}
               </span>
+              {showCatFact && catFactText && (
+                <p className="cal-cat-fact">{catFactText}</p>
+              )}
             </div>
             <KittyClock
               clockTime={clockTime}
