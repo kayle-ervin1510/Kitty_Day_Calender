@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
 export default function Navbar() {
-  const { logout, deletedEvents } = useApp()
+  const { logout, deletedEvents, user } = useApp()
   const deletedCount = deletedEvents?.length ?? 0
   const navigate   = useNavigate()
 
@@ -36,7 +36,7 @@ export default function Navbar() {
       <nav className="navbar">
         <div className="navbar-inner">
           <NavLink to="/home" className="navbar-brand" onClick={closeMenu}>
-            <span className="brand-icon">🐱</span>
+            <span className="brand-icon">{user?.profilePic ?? '🐱'}</span>
             Kitty Day Calendar
           </NavLink>
 

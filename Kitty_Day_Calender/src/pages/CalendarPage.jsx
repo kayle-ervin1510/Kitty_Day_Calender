@@ -366,8 +366,9 @@ export default function CalendarPage() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  function handleCatFact() {
-    setCatFactText(getDailyCatFact())
+  async function handleCatFact() {
+    const fact = await getDailyCatFact()
+    setCatFactText(fact)
     setShowCatFact(true)
   }
 

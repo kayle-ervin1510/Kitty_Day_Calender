@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-const CAT_FACTS = [
+const CAT_FACTS_FALLBACK = [
   'Cats sleep 12–16 hours per day!',
   'A group of cats is called a "clowder."',
   'Cats can make over 100 different sounds.',
@@ -12,16 +12,6 @@ const CAT_FACTS = [
   "A cat's purr vibrates at 25–150 Hz, which can promote healing.",
   'Cats spend about 30% of their waking hours grooming.',
   'Cats have 32 muscles in each ear.',
-  'A cat can rotate its ears 180 degrees.',
-  'Cats have five toes on their front paws but only four on their back.',
-  'The technical term for a hairball is a "bezoar."',
-  'Cats are nearsighted but have excellent night vision.',
-  "A cat's heart beats 110–140 times per minute.",
-  'A cat always lands on its feet thanks to its flexible spine.',
-  'Ancient Egyptians worshipped a cat goddess named Bastet.',
-  'Cats rarely meow at other cats — meowing is mostly for humans.',
-  'A cat can sprint up to 30 mph over short distances.',
-  'Indoor cats live 12–17 years on average.',
 ]
 
 // Normalize DB snake_case rows to camelCase so pages don't need to change.
@@ -430,14 +420,23 @@ export function AppProvider({ children }) {
     }
   }
 
-  function getDailyCatFact() {
+  async function getDailyCatFact() {
     const today = new Date().toDateString()
     if (catFactDate === today && catFact) return catFact
-    const idx  = Math.floor(Math.random() * CAT_FACTS.length)
-    const fact = CAT_FACTS[idx]
-    setCatFactDate(today)
-    setCatFact(fact)
-    return fact
+
+    try {
+      const res  = await fetch('https://cat-fact.herokuapp.com/facts/random?animal_type=cat')
+      const data = await res.json()
+      const fact = data?.text || CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)]
+      setCatFactDate(today)
+      setCatFact(fact)
+      return fact
+    } catch {
+      const fact = CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)]
+      setCatFactDate(today)
+      setCatFact(fact)
+      return fact
+    }
   }
 
   // ── Derived state ──────────────────────────────────────────────────────────

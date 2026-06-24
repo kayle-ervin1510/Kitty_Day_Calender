@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import homeCat from '../assets/home-cat.png'
 
 export default function HomePage() {
   const { user } = useApp()
@@ -9,7 +10,7 @@ export default function HomePage() {
   return (
     <div className="home-page">
       <div className="home-hero">
-        <span className="home-cat">🐱</span>
+        <img src={homeCat} alt="Kitty Day Calendar cat" className="home-cat-img" />
         <h1>Welcome to Kitty Day Calendar, {name}!</h1>
         <p className="home-hero-sub">Your purr-fectly fun way to track your schedule.</p>
       </div>
