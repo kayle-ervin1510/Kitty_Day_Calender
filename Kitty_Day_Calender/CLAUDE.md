@@ -30,6 +30,7 @@ Root `/` redirects to `/login`. Catch-all `*` renders `ErrorPage`.
 |---|---|
 | `/login` | `LoginPage` — handles both login and register |
 | `/confirm` | `ConfirmPage` — email confirm step after register |
+| `/reset-password` | `ResetPasswordPage` — password-reset flow; outside both layouts |
 | `/home` | `HomePage` |
 | `/calendar` | `CalendarPage` |
 | `/events/new` | `AddEventPage` — pre-fills `date` from `?date=YYYY-MM-DD` query param |
@@ -39,6 +40,7 @@ Root `/` redirects to `/login`. Catch-all `*` renders `ErrorPage`.
 | `/about` | `AboutPage` |
 | `/contact` | `ContactPage` |
 | `/litter-box` | `LitterBoxPage` — soft-deleted events; badge count shown in Navbar |
+| `/auth/callback` | `AuthCallbackPage` — Supabase email-confirm callback; intentionally outside both layout wrappers |
 
 ### Global state (`src/context/AppContext.jsx`)
 Single `AppContext`; `useApp()` is the only access point. All Supabase calls live here — pages never call `supabase` directly.
@@ -53,28 +55,32 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 |---|---|
 | `user` | Logged-in user object or `null` |
 | `pendingUser` | Registered but not yet confirmed |
-| `userEvents` | Events for current user (derived from `events`) |
+| `initializing` | `true` until session check resolves; `ProtectedLayout` returns `null` during this time |
+| `isYearOfCat` | Boolean — whether today falls in a Vietnamese Year of the Cat (`yearOfCat.js`) |
+| `userEvents` | Events for current user where `deletedAt` is null |
 | `deletedEvents` | Soft-deleted events for current user (the Litter Box) |
-| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents }` |
+| `familyMembers` | Members from `family_members` table for current user's family account |
+| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents, showCatHolidays }` |
 | `catFact` / `catFactDate` | Daily cat fact — same fact all day, randomised on page refresh |
 | `register(userData)` | `supabase.auth.signUp`; sets `pendingUser`; returns `{ success, error? }` |
 | `login(usernameOrEmail, password)` | Resolves username → email via `get_email_by_username` RPC, then `signInWithPassword`; returns `{ success, error? }` |
 | `logout()` | `supabase.auth.signOut()`; state cleared by `onAuthStateChange` |
 | `updateProfile(updates)` | Patches `user_profiles`; also calls `supabase.auth.updateUser` if `email` changes |
 | `addEvent / updateEvent / deleteEvent / restoreEvent / emptyLitterBox` | Full CRUD on `user_events`; `deleteEvent` is a soft delete (`deleted_at`) |
-| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` — **in-memory only, not persisted** |
-| `getDailyCatFact()` | Returns same fact for the day within a session; rotates on page refresh |
+| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` **and persists to `user_profiles.theme`** |
+| `getDailyCatFact()` | Fetches from `cat-fact.herokuapp.com`; falls back to hardcoded strings on failure. Returns same fact all day; rotates on page refresh. |
+| `saveDailyCatFact(payload)` | Persists a cat fact string to `user_profiles.daily_cat_fact` |
 | `addFamilyMember` / `removeFamilyMember` | Creates `family_accounts` row if needed; inserts/deletes `family_members` |
-
-Cat facts are a hardcoded array of 20 strings inside `AppContext.jsx`.
 
 ### Event data shape
 
-`{ id, userId, createdAt, name, date (YYYY-MM-DD), startTime, endTime, eventType, notifyOptions, familyVisible, note }`
+`{ id, userId, createdAt, name, date (YYYY-MM-DD), startTime, endTime, eventType ('holiday'|'birthday'|'other'), notifyOptions, familyVisible, note, imageUrl, deletedAt }`
 
 ### Components (`src/components/`)
 - **`Navbar.jsx`** — shared nav bar rendered by `ProtectedLayout`. Shows a Litter Box badge when `deletedEvents.length > 0`. Logout uses a three-state modal (`confirming` → `goodbye` / `staying`).
 - **`KittyClock.jsx`** — SVG cat-face clock rendered on `CalendarPage`. Receives `clockTime`, `expanded`, and `onToggle` props. Collapsed shows sleepy eyes + digital HH:MM; expanded shows wide eyes + seconds hand + timezone.
+- **`HttpCatImage.jsx`** — renders an `<img>` from `https://http.cat/{status}`. Falls back to 404 if the code isn't in `HTTP_CAT_SUPPORTED` (`httpCat.js`). Used by `LoginPage`, `EditEventPage`, and `ErrorPage`.
+- **`CatImagePicker.jsx`** — lets users attach a cat image to an event. For `holiday`/`birthday` types fetches a wild-cat photo (Unsplash) + animal fact (API Ninjas); for `other` fetches a domestic-cat photo (The Cat API). Used by `AddEventPage` and `EditEventPage`.
 
 ### CalendarPage details (`src/pages/CalendarPage.jsx`)
 Three views (`month`, `week`, `day`) with prev/next navigation; clicking a month or week cell drills into day view. Federal holidays are computed dynamically per year via weekday-offset math (`getFederalHolidays`). International holidays are a hardcoded fixed-date list (`INTL_HOLIDAYS`). Both are toggled via `prefs`. A live clock ticks via `setInterval` and drives the `KittyClock` component.
@@ -105,6 +111,7 @@ Global CSS in `src/index.css` and `src/App.css`. Theme applied by `data-theme` o
 | `rainbow` | Bold purples, electric teals, vivid pinks, bright gold |
 | `meow-mixer` | Rich orange, dark green, tanned brown, deep earthy tones |
 | `mewture` | Muted natural tones — soft earth, warm beige, quiet greens |
+| `year-of-cat` | Special theme; auto-downgrades to `light` outside Vietnamese Year of the Cat dates |
 
 **Shared utility classes:** `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-sm`, `.btn-lg`, `.btn-full`, `.card`, `.form-group`, `.form-error`, `.badge`, `.badge-event`, `.badge-holiday`, `.badge-birthday`, `.divider`, `.page-title`, `.page-subtitle`, `.cat-fact-banner`.
 

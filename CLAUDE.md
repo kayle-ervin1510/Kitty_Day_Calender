@@ -24,8 +24,14 @@ Project_2/
 │   │   ├── lib/yearOfCat.js    # Vietnamese zodiac Year of the Cat date ranges
 │   │   ├── components/         # Navbar.jsx, KittyClock.jsx, HttpCatImage.jsx, CatImagePicker.jsx
 │   │   └── pages/              # One file per route (see Routing section)
+│   ├── tests/                  # Playwright E2E tests (auth-callback.spec.js)
 │   └── package.json
-└── Main/supabase/              # Backend placeholder — empty, not yet configured
+├── supabase/                   # Supabase CLI project (linked to remote)
+│   ├── reference/              # ERD screenshot, original schema, UX decisions
+│   └── supabase/               # CLI root — run all `npx supabase` commands from here
+│       ├── config.toml
+│       └── migrations/         # 13 applied migrations
+└── Main/supabase/              # Empty placeholder — backend lives in supabase/ above
 ```
 
 ## Commands (run from `Kitty_Day_Calender/`)
@@ -40,7 +46,9 @@ npm run lint       # ESLint
 Playwright is configured for E2E tests. Tests live in `tests/`. The dev server starts automatically:
 
 ```bash
-npm test       # run Playwright tests (auto-starts dev server on localhost:5173)
+npm test                                    # run all Playwright tests
+npx playwright test tests/auth-callback.spec.js  # run a single test file
+npx playwright test --headed               # run with browser visible
 ```
 
 ## Environment variables
@@ -201,10 +209,23 @@ Shared utility classes: `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`,
 - Allow Permissions page (currently a button stub on `HomePage`)
 - `prefs` fields other than `theme` not yet persisted to Supabase
 
+## Supabase CLI (run from `supabase/supabase/`)
+
+```bash
+npx supabase login
+npx supabase link --project-ref ntazfxyuwzqoavsfvdmm   # re-link if needed
+npx supabase migration new <name>   # create a new migration file
+npx supabase db push                # push local migrations to remote
+npx supabase db pull                # pull remote schema → baseline migration
+```
+
+Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17.6). 13 migrations applied.
+
 ## Schema reference
 
-`Client/skeleton/My_Schema_Example.sql` contains the original planned schema in MySQL backtick style with spaced names. The live Supabase schema diverges from this — treat it as historical context only.
+`Client/skeleton/My_Schema_Example.sql` contains the original planned schema in MySQL backtick style with spaced names. The live Supabase schema diverges from this — treat it as historical context only. `supabase/reference/` has the ERD screenshot and authoritative UX/schema decisions.
 
 ## See also
 
-`Kitty_Day_Calender/CLAUDE.md` is a more detailed reference scoped to the frontend directory — use it when working inside `Kitty_Day_Calender/src/`.
+- `Kitty_Day_Calender/CLAUDE.md` — frontend-scoped reference; **note:** may lag behind this file on recently added features
+- `supabase/CLAUDE.md` — Supabase schema and RLS details
