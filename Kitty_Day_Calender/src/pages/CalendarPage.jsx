@@ -14,6 +14,21 @@ import imgColumbusDay   from '../assets/federal-holidays/columbus-day.png'
 import imgVeteransDay   from '../assets/federal-holidays/veterans-day.png'
 import imgThanksgiving  from '../assets/federal-holidays/thanksgiving.png'
 import imgChristmas     from '../assets/federal-holidays/christmas.png'
+import imgValentines    from '../assets/us-popular-holidays/valentines-day.png'
+import imgEaster        from '../assets/us-popular-holidays/easter-sunday.png'
+import imgStPatricks    from '../assets/us-popular-holidays/st-patricks-day.png'
+import imgHalloween     from '../assets/us-popular-holidays/halloween.png'
+import imgChristmasEve  from '../assets/us-popular-holidays/christmas-eve.png'
+import imgEarthDay      from '../assets/us-popular-holidays/earth-day.png'
+import imgFathersDay    from '../assets/us-popular-holidays/fathers-day.png'
+import imgMothersDay    from '../assets/us-popular-holidays/mothers-day.png'
+import imgGrandparents  from '../assets/us-popular-holidays/grandparents-day.png'
+import imgNewYearsEve   from '../assets/us-popular-holidays/new-years-eve.png'
+import imgCincoDeMayo   from '../assets/us-popular-holidays/cinco-de-mayo.png'
+import imgAprilFools    from '../assets/us-popular-holidays/april-fools.png'
+import imgGroundhogDay  from '../assets/us-popular-holidays/groundhog-day.png'
+import imgBlackFriday   from '../assets/us-popular-holidays/black-friday.png'
+import imgCyberMonday   from '../assets/us-popular-holidays/cyber-monday.png'
 import oopsCat        from '../assets/oops-cat.png'
 
 function ScratchIcon({ className }) {
@@ -37,6 +52,8 @@ function ScratchIcon({ className }) {
 
 // ── Holiday data ─────────────────────────────────────────────────────────────
 
+function dateToMonthDay(d) { return { month: d.getMonth(), day: d.getDate() } }
+
 // nth weekday (0=Sun…6=Sat) in a month, 1-based n
 function nthWeekday(year, month, n, wd) {
   const first = new Date(year, month, 1).getDay()
@@ -46,6 +63,49 @@ function nthWeekday(year, month, n, wd) {
 function lastWeekday(year, month, wd) {
   const last = new Date(year, month + 1, 0)
   return last.getDate() - ((last.getDay() - wd + 7) % 7)
+}
+
+function getUsPopularHolidays(year) {
+  // Easter — Anonymous Gregorian algorithm
+  const a = year % 19, b = Math.floor(year / 100), c = year % 100
+  const dv = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - dv - g + 15) % 30
+  const ii = Math.floor(c / 4), k = c % 4
+  const l = (32 + 2 * e + 2 * ii - h - k) % 7
+  const mv = Math.floor((a + 11 * h + 22 * l) / 451)
+  const easterMonth = Math.floor((h + l - 7 * mv + 114) / 31) - 1
+  const easterDay   = ((h + l - 7 * mv + 114) % 31) + 1
+
+  // Floating Sundays
+  const mothersDayDay      = nthWeekday(year, 4, 2, 0) // 2nd Sunday of May
+  const fathersDayDay      = nthWeekday(year, 5, 3, 0) // 3rd Sunday of June
+  const laborDayDay        = nthWeekday(year, 8, 1, 1) // 1st Monday of September
+  const grandparentsDayDay = laborDayDay + 6            // 1st Sunday after Labor Day
+
+  // Shopping holidays (relative to Thanksgiving; Cyber Monday can fall in December)
+  const thanksgivingDay = nthWeekday(year, 10, 4, 4)
+  const blackFriday  = dateToMonthDay(new Date(year, 10, thanksgivingDay + 1))
+  const cyberMonday  = dateToMonthDay(new Date(year, 10, thanksgivingDay + 4))
+
+  return [
+    { month: 1,  day: 2,               name: "Groundhog Day 🦫" },
+    { month: 1,  day: 14,              name: "Valentine's Day 💝" },
+    { month: 2,  day: 17,              name: "St. Patrick's Day ☘️" },
+    { month: 3,  day: 1,               name: "April Fools' Day 🃏" },
+    { month: 3,  day: 22,              name: "Earth Day 🌍" },
+    { month: 4,  day: 5,               name: "Cinco de Mayo 🎉" },
+    { month: 9,  day: 31,              name: "Halloween 🎃" },
+    { month: 10, day: 1,               name: "Día de los Muertos 💀🌼" },
+    { month: 11, day: 24,              name: "Christmas Eve 🎄" },
+    { month: 11, day: 31,              name: "New Year's Eve 🎆" },
+    { month: easterMonth, day: easterDay,    name: "Easter Sunday 🐣" },
+    { month: 4,  day: mothersDayDay,         name: "Mother's Day 💐" },
+    { month: 5,  day: fathersDayDay,         name: "Father's Day 👔" },
+    { month: 8,  day: grandparentsDayDay,    name: "Grandparents Day 👴👵" },
+    { ...blackFriday,                        name: "Black Friday 🛍️" },
+    { ...cyberMonday,                        name: "Cyber Monday 💻" },
+  ]
 }
 
 function getFederalHolidays(year) {
@@ -77,6 +137,24 @@ const FEDERAL_HOLIDAY_IMAGES = {
   "Veterans Day":     imgVeteransDay,
   "Thanksgiving":     imgThanksgiving,
   "Christmas Day":    imgChristmas,
+}
+
+const US_POPULAR_HOLIDAY_IMAGES = {
+  "Valentine's Day 💝":       imgValentines,
+  "Easter Sunday 🐣":         imgEaster,
+  "St. Patrick's Day ☘️":     imgStPatricks,
+  "Halloween 🎃":              imgHalloween,
+  "Christmas Eve 🎄":          imgChristmasEve,
+  "Earth Day 🌍":              imgEarthDay,
+  "Father's Day 👔":           imgFathersDay,
+  "Mother's Day 💐":           imgMothersDay,
+  "Grandparents Day 👴👵":     imgGrandparents,
+  "New Year's Eve 🎆":         imgNewYearsEve,
+  "Cinco de Mayo 🎉":          imgCincoDeMayo,
+  "April Fools' Day 🃏":       imgAprilFools,
+  "Groundhog Day 🦫":          imgGroundhogDay,
+  "Black Friday 🛍️":           imgBlackFriday,
+  "Cyber Monday 💻":           imgCyberMonday,
 }
 
 // UN International Days + widely-known cultural observances.
@@ -404,6 +482,11 @@ export default function CalendarPage() {
         .filter(h => h.month === m && h.day === d)
         .forEach(h => out.push({ ...h, kind: 'cat' }))
     }
+    if (prefs.showUsPopularHolidays) {
+      getUsPopularHolidays(y)
+        .filter(h => h.month === m && h.day === d)
+        .forEach(h => out.push({ ...h, kind: 'us-popular' }))
+    }
     return out
   }
 
@@ -686,11 +769,19 @@ export default function CalendarPage() {
           <div className="cal-day-section">
             <p className="cal-day-section-label">Holidays</p>
             {holidays.map((h, i) => {
-              const holidayImg = h.kind === 'federal' ? FEDERAL_HOLIDAY_IMAGES[h.name] : null
+              const holidayImg = h.kind === 'federal'
+                ? FEDERAL_HOLIDAY_IMAGES[h.name]
+                : h.kind === 'us-popular'
+                  ? US_POPULAR_HOLIDAY_IMAGES[h.name]
+                  : null
+              const kindEmoji = h.kind === 'federal' ? '🇺🇸'
+                : h.kind === 'cat' ? '🐱'
+                : h.kind === 'us-popular' ? '🧶'
+                : '🌍'
               return (
                 <div key={i}>
                   <div className={`cal-day-row cal-day-row-${h.kind}`}>
-                    <span>{h.kind === 'federal' ? '🇺🇸' : h.kind === 'cat' ? '🐱' : '🌍'}</span>
+                    <span>{kindEmoji}</span>
                     <span>{h.name}</span>
                   </div>
                   {holidayImg && (
@@ -838,22 +929,44 @@ export default function CalendarPage() {
       {/* ── Holiday toggles ──────────────────────────────────────────────── */}
       <div className="cal-toggles">
         <button
-          className={`btn btn-sm${prefs.showFederalHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
+          className={`btn btn-sm cal-holiday-btn${prefs.showFederalHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
           onClick={() => updatePrefs({ showFederalHolidays: !prefs.showFederalHolidays })}
+          aria-label="Toggle Federal Holidays"
         >
-          {prefs.showFederalHolidays ? '✓' : '+'} Federal Holidays 🇺🇸
+          <span className="cal-holiday-icon">🇺🇸</span>
+          <span className="cal-holiday-tooltip">
+            {prefs.showFederalHolidays ? 'Hide' : 'Apply'} Federal Holidays
+          </span>
         </button>
         <button
-          className={`btn btn-sm${prefs.showInternationalHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
+          className={`btn btn-sm cal-holiday-btn${prefs.showInternationalHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
           onClick={() => updatePrefs({ showInternationalHolidays: !prefs.showInternationalHolidays })}
+          aria-label="Toggle International Holidays"
         >
-          {prefs.showInternationalHolidays ? '✓' : '+'} International Holidays 🌍
+          <span className="cal-holiday-icon">🌍</span>
+          <span className="cal-holiday-tooltip">
+            {prefs.showInternationalHolidays ? 'Hide' : 'Apply'} International Holidays
+          </span>
         </button>
         <button
-          className={`btn btn-sm${prefs.showCatHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
+          className={`btn btn-sm cal-holiday-btn${prefs.showCatHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
           onClick={() => updatePrefs({ showCatHolidays: !prefs.showCatHolidays })}
+          aria-label="Toggle Cat Holidays"
         >
-          {prefs.showCatHolidays ? '✓' : '+'} Cat Holidays 🐱
+          <span className="cal-holiday-icon">😻</span>
+          <span className="cal-holiday-tooltip">
+            {prefs.showCatHolidays ? 'Hide' : 'Apply'} Cat Holidays
+          </span>
+        </button>
+        <button
+          className={`btn btn-sm cal-holiday-btn${prefs.showUsPopularHolidays ? ' btn-toggle-on' : ' btn-secondary'}`}
+          onClick={() => updatePrefs({ showUsPopularHolidays: !prefs.showUsPopularHolidays })}
+          aria-label="Toggle US Popular Holidays"
+        >
+          <span className="cal-holiday-icon">🧶</span>
+          <span className="cal-holiday-tooltip">
+            {prefs.showUsPopularHolidays ? 'Hide' : 'Apply'} US Popular Holidays
+          </span>
         </button>
       </div>
 

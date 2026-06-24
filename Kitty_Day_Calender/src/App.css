@@ -763,6 +763,35 @@
   text-align: center;
 }
 
+/* Holiday icon-only buttons with hover tooltip */
+.cal-holiday-btn {
+  position: relative;
+  padding: 0.35rem 0.6rem;
+}
+.cal-holiday-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  display: block;
+}
+.cal-holiday-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-nav);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+.cal-holiday-btn:hover .cal-holiday-tooltip { opacity: 1; }
+
 /* Toggle on state */
 .btn-toggle-on {
   background: var(--accent-2);

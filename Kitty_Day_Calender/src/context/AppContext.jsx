@@ -81,6 +81,7 @@ export function AppProvider({ children }) {
     showInternationalHolidays: false,
     showFamilyEvents: false,
     showCatHolidays: false,
+    showUsPopularHolidays: false,
   })
   const [catFactDate, setCatFactDate] = useState(null)
   const [catFact, setCatFact]         = useState(null)
