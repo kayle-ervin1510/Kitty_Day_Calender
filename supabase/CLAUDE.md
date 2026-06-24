@@ -19,10 +19,17 @@ supabase/                         ← repo root (this working directory)
 │   └── user_journey.md           # authoritative UX/schema decisions
 └── supabase/                     ← Supabase CLI project root (run ALL CLI commands from here)
     ├── config.toml               # local dev config (project initialized)
-    └── migrations/
+    └── migrations/               # 10 migrations applied
         ├── 20260623000001_create_user_profiles.sql
         ├── 20260623000002_create_user_events.sql
-        └── 20260623000003_create_family_accounts.sql
+        ├── 20260623000003_create_family_accounts.sql
+        ├── 20260623000004_fix_rls_performance.sql
+        ├── 20260623000005_fix_rls_and_indexes.sql
+        ├── 20260623000006_create_family_members.sql
+        ├── 20260623000007_create_user_profile_trigger.sql
+        ├── 20260623000008_get_email_by_username.sql
+        ├── 20260623000009_grant_rpc_execute.sql
+        └── 20260623000010_tighten_function_permissions.sql
 ```
 
 ## CLI commands
@@ -42,7 +49,7 @@ npx supabase gen types typescript --local                 # generate TS types fr
 
 ## Current schema
 
-Three migrations have been applied (or are ready to push). All tables have RLS enabled.
+All 10 migrations have been applied. All tables have RLS enabled.
 
 ### `user_profiles`
 FK to `auth.users(id)` on delete cascade. Key columns: `auth_id`, `username` (unique), `name`, `preferred_name`, `email`, `phone_number`, `profile_pic` (emoji, default `🐱`), `timezone`, `notifications_enabled`, `notification_method` (`email`|`sms`), `is_family_account`.
@@ -57,11 +64,10 @@ RLS: owner access via `user_id = (select id from user_profiles where auth_id = a
 > **Litter Box** — deleted events use `deleted_at` (soft delete). The frontend calls the view "Litter Box" and shows a "Your event has been shredded - Meow meow" message on delete.
 
 ### `family_accounts`
-Columns: `id`, `owner_id` (FK → `user_profiles`), `created_at`. The `family_members` table (linking non-owner members) has **not yet been created** — it is next.
+Columns: `id`, `owner_id` (FK → `user_profiles`), `created_at`.
 
-## Schema still to create
-
-- **`family_members`** — `name`, `email`, `phone`, `notifications_enabled` boolean, FK to `family_accounts.id`. Enables family-member-visible events via RLS on `user_events` for rows where `family_visible = true`.
+### `family_members`
+FK to `family_accounts.id`. Columns: `id`, `family_account_id`, `name`, `email`, `phone`, `notifications_enabled`, `created_at`. Enables family-member-visible events via RLS on `user_events` for rows where `family_visible = true`.
 
 ## Key design decisions
 
@@ -97,6 +103,5 @@ Frontend reads from `../Kitty_Day_Calender/.env`:
 
 ## What still needs to be done
 
-1. Create `family_members` migration
-2. Wire the frontend `AppContext.jsx` to Supabase Auth and the new tables
-3. Integrate the Animals API for cat images and daily cat facts
+1. Integrate the Animals API for cat images and daily cat facts
+2. Persist `prefs` (theme, holiday toggles) to Supabase

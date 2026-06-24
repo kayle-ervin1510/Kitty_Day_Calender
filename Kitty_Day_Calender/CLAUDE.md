@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this app is
 
-**Kitty Day Calendar** — a cat-themed calendar SPA. Users register, create events (`holiday` | `birthday` | `other`), and get a daily cat fact. Family accounts allow multiple profiles under one login. All state is in-memory; Supabase integration is planned but not yet wired.
+**Kitty Day Calendar** — a cat-themed calendar SPA. Users register, create events (`holiday` | `birthday` | `other`), and get a daily cat fact. Family accounts allow multiple profiles under one login. Supabase Auth + Postgres are fully integrated.
 
 ## Commands (run from this directory)
 
@@ -15,7 +15,7 @@ npm run preview    # Serve the dist/ build locally
 npm run lint       # ESLint
 ```
 
-No test runner is configured.
+Playwright is configured. Tests live in `tests/`; `npm test` auto-starts the dev server.
 
 ## Architecture
 
@@ -41,9 +41,11 @@ Root `/` redirects to `/login`. Catch-all `*` renders `ErrorPage`.
 | `/litter-box` | `LitterBoxPage` — soft-deleted events; badge count shown in Navbar |
 
 ### Global state (`src/context/AppContext.jsx`)
-Single `AppContext`; `useApp()` is the only access point. All state is in-memory — nothing persists to a backend yet.
+Single `AppContext`; `useApp()` is the only access point. All Supabase calls live here — pages never call `supabase` directly.
 
-**Registration two-step:** `register()` sets `pendingUser` (not `user`). `confirmRegistration()` promotes `pendingUser` → `user`.
+**DB snake_case ↔ camelCase:** `normalizeProfile`, `normalizeEvent`, and `normalizeMember` helpers convert DB rows to camelCase. When writing DB updates, map field names back to snake_case manually.
+
+**Registration flow:** `register()` calls `supabase.auth.signUp`, sets `pendingUser` (not `user`), and navigates to `/confirm`. `onAuthStateChange` fires on email confirmation, calls `loadUserData`, sets `user`, and `PublicLayout` redirects to `/home`.
 
 **Key exports:**
 
@@ -55,18 +57,14 @@ Single `AppContext`; `useApp()` is the only access point. All state is in-memory
 | `deletedEvents` | Soft-deleted events for current user (the Litter Box) |
 | `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents }` |
 | `catFact` / `catFactDate` | Daily cat fact — same fact all day, randomised on page refresh |
-| `register(userData)` | Returns `{ success, error? }` |
-| `confirmRegistration()` | Promotes `pendingUser` → `user` |
-| `login(usernameOrEmail, password)` | Returns `{ success, error? }` |
-| `logout()` | Clears `user` and `pendingUser` |
-| `updateProfile(updates)` | Patches `user` and syncs into `users` array |
-| `addEvent(eventData)` | Assigns `id`, `userId`, `createdAt`; returns the new event |
-| `updateEvent(id, updates)` | Patches by id |
-| `deleteEvent(id)` | Moves to `deletedEvents` with `deletedAt` timestamp |
-| `emptyLitterBox()` | Permanently removes current user's deleted events |
-| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` |
-| `getDailyCatFact()` | Returns same fact for the day; rotates at midnight |
-| `addFamilyMember` / `removeFamilyMember` | Manages `familyMembers` array |
+| `register(userData)` | `supabase.auth.signUp`; sets `pendingUser`; returns `{ success, error? }` |
+| `login(usernameOrEmail, password)` | Resolves username → email via `get_email_by_username` RPC, then `signInWithPassword`; returns `{ success, error? }` |
+| `logout()` | `supabase.auth.signOut()`; state cleared by `onAuthStateChange` |
+| `updateProfile(updates)` | Patches `user_profiles`; also calls `supabase.auth.updateUser` if `email` changes |
+| `addEvent / updateEvent / deleteEvent / restoreEvent / emptyLitterBox` | Full CRUD on `user_events`; `deleteEvent` is a soft delete (`deleted_at`) |
+| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` — **in-memory only, not persisted** |
+| `getDailyCatFact()` | Returns same fact for the day within a session; rotates on page refresh |
+| `addFamilyMember` / `removeFamilyMember` | Creates `family_accounts` row if needed; inserts/deletes `family_members` |
 
 Cat facts are a hardcoded array of 20 strings inside `AppContext.jsx`.
 
@@ -120,8 +118,8 @@ Design reference lives in `../Client/skeleton/`:
 
 ## Planned but not yet implemented
 
-- Supabase Auth + Postgres persistence
 - Animals API integration (cat images for events, profile pictures, `ErrorPage`)
 - Email / SMS notifications (toggle exists in `ProfilePage`; nothing is wired)
 - Notification timing options (2 days prior, day-of)
 - Allow Permissions page (button stub on `HomePage`)
+- `prefs` persistence to Supabase

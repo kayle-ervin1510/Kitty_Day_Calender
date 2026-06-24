@@ -35,7 +35,11 @@ npm run preview    # Serve the dist/ build locally
 npm run lint       # ESLint
 ```
 
-No test runner is configured.
+Playwright is configured for E2E tests. Tests live in `tests/`. The dev server starts automatically:
+
+```bash
+npm test       # run Playwright tests (auto-starts dev server on localhost:5173)
+```
 
 ## Environment variables
 
@@ -71,6 +75,7 @@ Two layout wrappers:
 | `/about` | `AboutPage` | Static about page |
 | `/contact` | `ContactPage` | Support contact info |
 | `/litter-box` | `LitterBoxPage` | Soft-deleted events; badge count shown in Navbar |
+| `/auth/callback` | `AuthCallbackPage` | Supabase OAuth/email-confirm callback — intentionally outside both layout wrappers so the session can be set before any redirect |
 | `*` | `ErrorPage` | Cat-themed 404 |
 
 Root `/` redirects to `/login`.
