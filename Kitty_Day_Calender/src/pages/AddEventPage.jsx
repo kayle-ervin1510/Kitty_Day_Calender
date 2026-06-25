@@ -63,7 +63,7 @@ export default function AddEventPage() {
       } : null,
       eventType,
       imageUrl,
-      isPublic,
+      familyVisible: isPublic,
     })
 
     setSaved(true)

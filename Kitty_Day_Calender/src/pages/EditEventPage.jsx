@@ -78,7 +78,7 @@ export default function EditEventPage() {
   const [customTime,   setCustomTime]   = useState(event?.customNotify?.time   ?? '')
   const [eventType,  setEventType]  = useState(event?.eventType  ?? 'other')
   const [imageUrl,   setImageUrl]   = useState(event?.imageUrl   ?? null)
-  const [isPublic,   setIsPublic]   = useState(event?.isPublic   ?? false)
+  const [isPublic,   setIsPublic]   = useState(event?.familyVisible ?? false)
   const [error,      setError]      = useState('')
 
   // Delete confirmation flow: 'idle' | 'confirming' | 'deleted'
@@ -111,7 +111,7 @@ export default function EditEventPage() {
       } : null,
       eventType,
       imageUrl,
-      isPublic,
+      familyVisible: isPublic,
     })
 
     navigate('/calendar')
