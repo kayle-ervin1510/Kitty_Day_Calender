@@ -153,7 +153,7 @@ export default function FamilyPage() {
                       )}
                     </div>
                     <div className="family-member-actions">
-                      {!m.linkedUserId && m.email && (
+                      {!m.linkedUserId && (
                         <button
                           className="btn btn-sm btn-secondary"
                           disabled={inviteLoading === m.id}

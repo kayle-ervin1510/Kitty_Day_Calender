@@ -455,7 +455,7 @@ export function AppProvider({ children }) {
 
     const { data, error } = await supabase
       .from('family_invites')
-      .insert({ family_account_id: faId, family_member_id: memberId, invited_email: email })
+      .insert({ family_account_id: faId, family_member_id: memberId, invited_email: email || null })
       .select('token')
       .single()
 
