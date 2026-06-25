@@ -48,8 +48,9 @@ export default function FamilyPage() {
   }
 
   async function handleConfirmRemove(id) {
-    await removeFamilyMember(id)
+    const result = await removeFamilyMember(id)
     setRemoving(null)
+    if (!result.success) flash(`Could not remove member: ${result.error}`)
   }
 
   async function handleGetInviteLink(m) {

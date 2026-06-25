@@ -246,8 +246,16 @@ export function AppProvider({ children }) {
       const { data: resolvedEmail } = await supabase
         .rpc('get_email_by_username', { p_username: usernameOrEmail })
 
-      if (!resolvedEmail) return { success: false, error: 'Invalid username or password.' }
+      if (!resolvedEmail) return { success: false, error: 'No account found with that username.', notFound: true }
       email = resolvedEmail
+    } else {
+      // Check if any account exists with this email before attempting sign-in
+      const { data: exists } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle()
+      if (!exists) return { success: false, error: 'No account found with that email.', notFound: true }
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
