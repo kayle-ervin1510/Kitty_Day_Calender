@@ -583,7 +583,7 @@ export default function CalendarPage() {
   }
 
   function handleFamilyEvents() {
-    const hasFamily = user?.isFamilyAccount && familyMembers.length > 0
+    const hasFamily = (user?.isFamilyAccount && familyMembers.length > 0) || sharedEvents.length > 0
     if (!hasFamily) {
       setShowFamilyMsg(true)
       return
@@ -928,7 +928,7 @@ export default function CalendarPage() {
           className={`btn${prefs.showFamilyEvents ? ' btn-toggle-on' : ' btn-secondary'}`}
           onClick={handleFamilyEvents}
         >
-          {prefs.showFamilyEvents ? '✓ Hiding' : 'View'} Family Events
+          {prefs.showFamilyEvents ? '✓ Showing' : 'View'} Family Events
           <svg viewBox="0 0 32 32" width="1em" height="1em" aria-hidden="true"
             style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '0.35em', flexShrink: 0 }}>
             <ellipse cx="16" cy="22.5" rx="7" ry="5.5" fill="currentColor" />
