@@ -26,3 +26,41 @@ Users can view their current, past, and future events in their My Events page ac
 
 User logs out.
 
+This React + Vite appliation using React Router DOM is functioning correctly and I want to preserve the existing US and user experiences. 
+
+Resources: 
+1. SQL Schema: @./Client/skeleton/My_Schema_Example.sql
+2. Supabase Project URL: https://ntazfxyuwzqoavsfvdmm.supabase.co/rest/v1/
+3. Supabase Public API Key: sb_publishable_kNnesLdkzvgCEDi35w2O9g_r3wY9Wec
+4. Resources: Users and Events.
+5. Applications user journey: @./Client/skeleton/user_journey.md
+
+Requirements:
+
+* Analyze the current application before making any code changes.
+* Identify all exisiting CRUD flows and components that manage data.
+* PResent and implementation plan before modifying code.
+
+Implementation Requirements:
+
+* PReserve the existing UI.
+* Replace all mock/local CRUD operations with Supabase API interactions.
+* Use axios for all API communications.
+* Create a dedicated API service layer
+* Components should never directly call axios
+* Store API configuration in environment variables.
+* Implement loading, error, and success states for all CRUD actions.
+* Ensure all UI changes remain synchronized with the Supabase backend.
+* Analyze the SQL schema and correctly implement any realtionships between tasks and users
+* Do not implement authentication at this time
+* Do not introduce unnecessary architectural changes or redesign existing components.
+
+Deliverables:
+
+1. Analysis of current architecture
+2. Proposed implemtnation plan
+3. Code changes
+4. Summary of modifed files
+5. Any assumptions made during implementation
+
+Before writng code, tell me if you identify any ambiguities, missing schema information or acrhitecutural concerns.
