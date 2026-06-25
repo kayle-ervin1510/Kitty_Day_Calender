@@ -44,6 +44,8 @@ export default function LoginPage() {
     setErrorStatus(null)
     const result = await login(signInForm.usernameOrEmail, signInForm.password)
     if (result.success) {
+      const redirect = sessionStorage.getItem('kitty_join_redirect')
+      if (redirect) { sessionStorage.removeItem('kitty_join_redirect'); window.location.href = redirect; return }
       navigate('/home')
     } else {
       setError(result.error)

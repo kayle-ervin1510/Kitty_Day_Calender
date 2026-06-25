@@ -52,6 +52,7 @@ function AppRoutes() {
           pass through fine, but any initializing guard would block it. */}
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/family/join" element={<JoinFamilyPage />} />
 
       <Route element={<PublicLayout />}>
         <Route path="/login" element={<LoginPage />} />
@@ -65,7 +66,6 @@ function AppRoutes() {
         <Route path="/events/:id/edit" element={<EditEventPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/family" element={<FamilyPage />} />
-        <Route path="/family/join" element={<JoinFamilyPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/litter-box" element={<LitterBoxPage />} />

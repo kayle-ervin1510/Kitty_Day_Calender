@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext'
 export default function JoinFamilyPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
-  const { acceptInvite } = useApp()
+  const { user, initializing, acceptInvite } = useApp()
   const navigate = useNavigate()
 
   const [details,  setDetails]  = useState(null)
@@ -30,12 +30,42 @@ export default function JoinFamilyPage() {
     setDone(true)
   }
 
-  if (loading) {
+  if (initializing || loading) {
     return (
       <div className="page">
         <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
           <p style={{ fontSize: '2rem' }}>🐱</p>
           <p style={{ color: 'var(--text-secondary)' }}>Loading invite...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="page">
+        <div className="card" style={{ maxWidth: '460px', margin: '2rem auto', padding: '2rem', textAlign: 'center' }}>
+          <p style={{ fontSize: '2.5rem' }}>🐾</p>
+          <h2>Family Invite</h2>
+          {details?.found && (
+            <p style={{ color: 'var(--text-secondary)' }}>
+              <strong>{details.ownerName}</strong> has invited <strong>{details.memberName}</strong> to
+              join their family calendar.
+            </p>
+          )}
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+            Log in or sign up to accept this invite.
+          </p>
+          <button
+            className="btn btn-primary"
+            style={{ marginTop: '1rem' }}
+            onClick={() => {
+              sessionStorage.setItem('kitty_join_redirect', window.location.href)
+              navigate('/login')
+            }}
+          >
+            Log in to Accept
+          </button>
         </div>
       </div>
     )

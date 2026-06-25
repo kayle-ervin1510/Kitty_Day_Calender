@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
 export default function FamilyPage() {
-  const { user, familyMembers, updateProfile, addFamilyMember, removeFamilyMember, generateInvite } = useApp()
+  const { user, familyMembers, updateProfile, addFamilyMember, removeFamilyMember, refreshFamilyMembers, generateInvite } = useApp()
   const navigate = useNavigate()
 
   const [removing, setRemoving]   = useState(null)
@@ -108,6 +108,12 @@ export default function FamilyPage() {
         {isFamily && (
           <>
             {savedMsg && <div className="litterbox-clean-msg">{savedMsg}</div>}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn btn-sm btn-secondary" onClick={refreshFamilyMembers}>
+                ↻ Refresh Members
+              </button>
+            </div>
 
             {/* Member list */}
             {familyMembers.length === 0 ? (

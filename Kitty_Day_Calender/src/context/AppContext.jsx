@@ -388,6 +388,15 @@ export function AppProvider({ children }) {
 
   // ── Family ─────────────────────────────────────────────────────────────────
 
+  async function refreshFamilyMembers() {
+    if (!familyAccountId) return
+    const { data } = await supabase
+      .from('family_members')
+      .select('*')
+      .eq('family_account_id', familyAccountId)
+    setFamilyMembers((data || []).map(normalizeMember))
+  }
+
   async function ensureFamilyAccount() {
     if (familyAccountId) return familyAccountId
 
@@ -569,7 +578,7 @@ export function AppProvider({ children }) {
       register, login, logout, resetPassword, changePassword, updateProfile, saveDailyCatFact, refreshProfile,
       addEvent, updateEvent, deleteEvent, restoreEvent, emptyLitterBox,
       updatePrefs,
-      addFamilyMember, removeFamilyMember, generateInvite, acceptInvite,
+      addFamilyMember, removeFamilyMember, refreshFamilyMembers, generateInvite, acceptInvite,
     }}>
       {children}
     </AppContext.Provider>
