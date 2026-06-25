@@ -29,6 +29,7 @@ import imgAprilFools    from '../assets/us-popular-holidays/april-fools.png'
 import imgGroundhogDay  from '../assets/us-popular-holidays/groundhog-day.png'
 import imgBlackFriday   from '../assets/us-popular-holidays/black-friday.png'
 import imgCyberMonday   from '../assets/us-popular-holidays/cyber-monday.png'
+import imgDiaDeMuertos  from '../assets/us-popular-holidays/dia-de-los-muertos.png'
 import oopsCat        from '../assets/oops-cat.png'
 
 function ScratchIcon({ className }) {
@@ -155,6 +156,7 @@ const US_POPULAR_HOLIDAY_IMAGES = {
   "Groundhog Day 🦫":          imgGroundhogDay,
   "Black Friday 🛍️":           imgBlackFriday,
   "Cyber Monday 💻":           imgCyberMonday,
+  "Día de los Muertos 💀🌼":   imgDiaDeMuertos,
 }
 
 // UN International Days + widely-known cultural observances.

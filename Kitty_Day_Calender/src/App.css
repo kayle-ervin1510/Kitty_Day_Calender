@@ -115,7 +115,7 @@
 }
 
 .logout-modal-emoji { font-size: 3.5rem; line-height: 1; margin: 0; }
-.logout-modal-lucky-cat { width: 140px; height: auto; object-fit: contain; margin: 0 auto; display: block; }
+.logout-modal-lucky-cat { width: 160px; height: 160px; object-fit: cover; border-radius: 1.25rem; margin: 0 auto 0.5rem; display: block; }
 .logout-modal-title {
   font-size: 1.3rem;
   font-weight: 700;
@@ -407,9 +407,10 @@
   padding: 2rem 1rem 0.5rem;
 }
 .about-cat-img {
-  width: 260px;
-  height: 200px;
+  width: 220px;
+  height: 290px;
   object-fit: cover;
+  object-position: center top;
   border-radius: 1.25rem;
   display: block;
   margin: 0 auto 1.1rem;
@@ -496,12 +497,13 @@
 .contact-cat { font-size: 3.5rem; display: block; margin-bottom: 0.6rem; }
 .contact-cat-img {
   display: block;
-  width: 260px;
-  height: 180px;
+  width: 220px;
+  height: 290px;
   object-fit: cover;
   object-position: center top;
   margin: 0 auto 0.6rem;
   border-radius: 1.5rem;
+  box-shadow: 0 4px 18px var(--shadow);
 }
 
 .oops-cat-img,
