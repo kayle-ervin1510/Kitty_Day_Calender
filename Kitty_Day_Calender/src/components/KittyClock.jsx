@@ -140,7 +140,7 @@ export default function KittyClock({ clockTime, expanded, onToggle }) {
       {/* Timezone — only when expanded */}
       {expanded && (
         <text x="65" y="207" textAnchor="middle" dominantBaseline="central"
-          style={{ fill: '#7a6152', fontSize: '9px' }}>
+          style={{ fill: '#7a6152', fontSize: '9px', fontWeight: 'bold' }}>
           {tz}
         </text>
       )}

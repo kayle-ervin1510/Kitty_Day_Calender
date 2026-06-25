@@ -700,8 +700,8 @@
 .cal-cat-card-expanded { min-width: 180px; max-width: 220px; }
 .cal-cat-img {
   width: 100%;
-  height: 130px;
-  object-fit: cover;
+  max-height: 200px;
+  object-fit: contain;
   border-radius: var(--radius-sm);
 }
 .cal-cat-fact {
@@ -1657,8 +1657,9 @@
 
 .cat-image-preview {
   width: 100%;
-  max-height: 220px;
-  object-fit: cover;
+  max-height: 320px;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
   border-radius: var(--radius-md);
   border: 2px solid var(--border);
 }
