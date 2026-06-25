@@ -51,6 +51,8 @@ npx playwright test tests/auth-callback.spec.js  # run a single test file
 npx playwright test --headed               # run with browser visible
 ```
 
+> **Test rate-limit gotcha:** The registration flow test (`auth-callback.spec.js`) actually calls `supabase.auth.signUp`, which counts against Supabase's free-tier email limit (~3 confirmation emails/hour). Running it too frequently returns "email rate limit exceeded." To bypass during dev, temporarily disable email confirmation in Supabase → Authentication → Providers → Email → "Confirm email."
+
 ## Environment variables
 
 Place in `Kitty_Day_Calender/.env` (not committed):
@@ -168,6 +170,10 @@ A DB trigger on `auth.users` INSERT creates the `user_profiles` row from auth me
 ## CalendarPage details
 
 Three views (`month`, `week`, `day`) with prev/next navigation; clicking a month or week cell drills into day view. Federal holidays computed dynamically per year via weekday-offset math (`getFederalHolidays`). International holidays are a hardcoded fixed-date list (`INTL_HOLIDAYS`). Both toggled via `prefs`. Vietnamese Year of the Cat start date added when `prefs.showCatHolidays` is on. A live clock ticks via `setInterval` and drives `KittyClock`.
+
+**Holiday images** — static PNGs live in `src/assets/`:
+- `federal-holidays/` — one image per US federal holiday (MLK Day, Presidents Day, Memorial Day, Juneteenth, Independence Day, Labor Day, Columbus Day, Veterans Day, Thanksgiving, Christmas, New Year's Day)
+- `us-popular-holidays/` — one image per popular US holiday (Valentine's Day, St. Patrick's Day, Easter, April Fools, Cinco de Mayo, Mother's Day, Father's Day, Grandparents Day, Halloween, Thanksgiving, Christmas Eve, New Year's Eve, Black Friday, Cyber Monday, Earth Day, Groundhog Day)
 
 ## Event data shape
 

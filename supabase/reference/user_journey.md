@@ -25,3 +25,4 @@ If something goes wrong, the page should state: "Oops, something went wrong. Sta
 Users can view their current, past, and future events in their My Events page accessable from their profile. 
 
 User logs out.
+

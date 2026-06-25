@@ -125,8 +125,8 @@ Design reference lives in `../Client/skeleton/`:
 
 ## Planned but not yet implemented
 
-- Animals API integration (cat images for events, profile pictures, `ErrorPage`)
 - Email / SMS notifications (toggle exists in `ProfilePage`; nothing is wired)
 - Notification timing options (2 days prior, day-of)
 - Allow Permissions page (button stub on `HomePage`)
-- `prefs` persistence to Supabase
+- `prefs` fields other than `theme` not yet persisted to Supabase
+- Cat images for profile pictures and `ErrorPage` (events already use `CatImagePicker`)
