@@ -30,7 +30,7 @@ Project_2/
 │   ├── reference/              # ERD screenshot, original schema, UX decisions
 │   └── supabase/               # CLI root — run all `npx supabase` commands from here
 │       ├── config.toml
-│       └── migrations/         # 13 applied migrations
+│       └── migrations/         # 14 applied migrations
 └── Main/supabase/              # Empty placeholder — backend lives in supabase/ above
 ```
 
@@ -46,12 +46,15 @@ npm run lint       # ESLint
 Playwright is configured for E2E tests. Tests live in `tests/`. The dev server starts automatically:
 
 ```bash
-npm test                                    # run all Playwright tests
-npx playwright test tests/auth-callback.spec.js  # run a single test file
-npx playwright test --headed               # run with browser visible
+npm test                                         # run all Playwright tests
+npx playwright test tests/auth-phases.spec.js   # run the 5-phase auth suite
+npx playwright test tests/auth-callback.spec.js # run the email-confirm callback test
+npx playwright test --headed                    # run with browser visible
 ```
 
-> **Test rate-limit gotcha:** The registration flow test (`auth-callback.spec.js`) actually calls `supabase.auth.signUp`, which counts against Supabase's free-tier email limit (~3 confirmation emails/hour). Running it too frequently returns "email rate limit exceeded." To bypass during dev, temporarily disable email confirmation in Supabase → Authentication → Providers → Email → "Confirm email."
+`auth-phases.spec.js` covers 5 phases: registration form validation, login, auth failure, RLS isolation, and session persistence. Phases 2–5 require env vars: `TEST_USER=<username_or_email> TEST_PASS=<password> npm test` — without them those phases are skipped.
+
+> **Test rate-limit gotcha:** `auth-callback.spec.js` calls `supabase.auth.signUp`, which counts against Supabase's free-tier email limit (~3 confirmation emails/hour). Running it too frequently returns "email rate limit exceeded." Bypass during dev by disabling email confirmation in Supabase → Authentication → Providers → Email → "Confirm email."
 
 ## Environment variables
 
@@ -69,7 +72,7 @@ The three image/fact API keys are optional — `CatImagePicker` degrades gracefu
 
 ## Tech stack
 
-- **Frontend:** React 19 + Vite 8 + React Router DOM v7, plain CSS
+- **Frontend:** React 19 + Vite 8 + React Router DOM v7, plain CSS — no TypeScript (all files are `.jsx`/`.js`)
 - **Backend:** Supabase (Postgres + Auth) — **fully integrated**
 - **External APIs:** `cat-fact.herokuapp.com` (live cat facts, with fallback), The Cat API / Unsplash / API Ninjas (event images, optional)
 
@@ -119,8 +122,9 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 | `userEvents` | Events for current user where `deletedAt` is null (derived from `events`) |
 | `deletedEvents` | Events for current user where `deletedAt` is set (the Litter Box) |
 | `familyMembers` | Members from the `family_members` table for the current user's family account |
-| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents, showCatHolidays }` |
-| `catFact` / `catFactDate` | Daily cat fact — same fact per calendar day per page session; randomises on page refresh |
+| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents, showCatHolidays, showUsPopularHolidays }` |
+| `catFact` / `catFactDate` | Daily cat fact — cached in `localStorage`; same fact returned all day, rotates on next-day page load |
+| `familyAccountId` | `family_accounts.id` for the current user's family account, or `null` |
 | `register(userData)` | Returns `{ success, error? }` |
 | `login(usernameOrEmail, password)` | Resolves username → email via `get_email_by_username` RPC, then `signInWithPassword`; returns `{ success, error? }` |
 | `logout()` | Calls `supabase.auth.signOut()`; state cleared by `onAuthStateChange` |
@@ -133,9 +137,9 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 | `deleteEvent(id)` | Sets `deleted_at` on the `user_events` row (soft delete); returns `{ success, error? }` |
 | `restoreEvent(id)` | Clears `deleted_at` on a soft-deleted event; returns `{ success, error? }` |
 | `emptyLitterBox()` | Hard-deletes all soft-deleted events for current user; returns `{ success, error? }` |
-| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` **and persists to `user_profiles.theme`** |
-| `getDailyCatFact()` | Fetches from `cat-fact.herokuapp.com`; falls back to 10 hardcoded strings on network failure. Same fact returned all day; rotates on page refresh. |
-| `saveDailyCatFact(payload)` | Persists a cat fact string to `user_profiles.daily_cat_fact` |
+| `updatePrefs(updates)` | Merges into `prefs`; persists `theme` to `user_profiles.theme` and all toggle flags to `user_profiles.calendar_prefs` (JSONB) |
+| `getDailyCatFact()` | Fetches from `cat-fact.herokuapp.com`; falls back to 10 hardcoded strings on network failure. Caches in `localStorage`; same fact returned all day. |
+| `saveDailyCatFact(payload)` | Persists a JSONB `{ date, fact, img }` object to `user_profiles.daily_cat_fact` |
 | `addFamilyMember(memberData)` | Creates `family_accounts` row if needed, then inserts into `family_members`; returns `{ success, member? }` |
 | `removeFamilyMember(id)` | Deletes from `family_members`; returns `{ success, error? }` |
 
@@ -145,7 +149,7 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 
 | Table | Key columns |
 |---|---|
-| `user_profiles` | `id`, `auth_id` (FK to `auth.users`), `username`, `name`, `preferred_name`, `email`, `phone_number`, `profile_pic`, `timezone`, `notifications_enabled`, `notification_method`, `is_family_account`, `theme`, `daily_cat_fact`, `created_at` |
+| `user_profiles` | `id`, `auth_id` (FK to `auth.users`), `username`, `name`, `preferred_name`, `email`, `phone_number`, `profile_pic`, `timezone`, `notifications_enabled`, `notification_method`, `is_family_account`, `theme`, `daily_cat_fact`, `calendar_prefs` (JSONB), `created_at` |
 | `user_events` | `id`, `user_id` (FK to `user_profiles`), `name`, `date`, `start_time`, `end_time`, `event_type`, `notify_options`, `family_visible`, `note`, `image_url`, `deleted_at`, `created_at` |
 | `family_accounts` | `id`, `owner_id` (FK to `user_profiles`) |
 | `family_members` | `id`, `family_account_id`, `name`, `email`, `phone`, `notifications_enabled`, `created_at` |
@@ -213,7 +217,6 @@ Shared utility classes: `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`,
 - Email / SMS notifications (toggle exists in `ProfilePage`; nothing is wired)
 - Notification timing options (2 days prior, day-of)
 - Allow Permissions page (currently a button stub on `HomePage`)
-- `prefs` fields other than `theme` not yet persisted to Supabase
 
 ## Supabase CLI (run from `supabase/supabase/`)
 
@@ -225,7 +228,7 @@ npx supabase db push                # push local migrations to remote
 npx supabase db pull                # pull remote schema → baseline migration
 ```
 
-Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17.6). 13 migrations applied.
+Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17.6). 14 migrations applied.
 
 ## Schema reference
 

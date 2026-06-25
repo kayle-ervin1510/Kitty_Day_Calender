@@ -32,7 +32,8 @@ supabase/                         ← repo root (this working directory)
         ├── 20260623000010_tighten_function_permissions.sql
         ├── 20260624000011_add_theme_to_user_profiles.sql
         ├── 20260624000012_add_image_url_to_user_events.sql
-        └── 20260624000013_add_daily_cat_fact_to_user_profiles.sql
+        ├── 20260624000013_add_daily_cat_fact_to_user_profiles.sql
+        └── 20260625000014_add_calendar_prefs_to_user_profiles.sql
 ```
 
 ## CLI commands
@@ -52,10 +53,10 @@ npx supabase gen types typescript --local                 # generate TS types fr
 
 ## Current schema
 
-All 13 migrations have been applied. All tables have RLS enabled.
+All 14 migrations have been applied. All tables have RLS enabled.
 
 ### `user_profiles`
-FK to `auth.users(id)` on delete cascade. Key columns: `auth_id`, `username` (unique), `name`, `preferred_name`, `email`, `phone_number`, `profile_pic` (emoji, default `🐱`), `timezone`, `notifications_enabled`, `notification_method` (`email`|`sms`), `is_family_account`, `theme`, `daily_cat_fact`.
+FK to `auth.users(id)` on delete cascade. Key columns: `auth_id`, `username` (unique), `name`, `preferred_name`, `email`, `phone_number`, `profile_pic` (emoji, default `🐱`), `timezone`, `notifications_enabled`, `notification_method` (`email`|`sms`), `is_family_account`, `theme`, `daily_cat_fact`, `calendar_prefs` (JSONB — stores `showFederalHolidays`, `showInternationalHolidays`, `showFamilyEvents`, `showCatHolidays`, `showUsPopularHolidays`).
 
 RLS: users can only read/write their own row (`auth.uid() = auth_id`).
 
@@ -107,4 +108,4 @@ Frontend reads from `../Kitty_Day_Calender/.env`:
 ## What still needs to be done
 
 1. Integrate the Animals API for cat images and daily cat facts
-2. Persist `prefs` (theme, holiday toggles) to Supabase
+2. Wire email / SMS notifications (schema supports it; frontend toggle exists but nothing sends)

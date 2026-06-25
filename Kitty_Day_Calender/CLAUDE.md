@@ -17,6 +17,11 @@ npm run lint       # ESLint
 
 Playwright is configured. Tests live in `tests/`; `npm test` auto-starts the dev server.
 
+```bash
+npx playwright test tests/auth-phases.spec.js   # 5-phase auth suite (requires TEST_USER / TEST_PASS env vars for phases 2–5)
+npx playwright test tests/auth-callback.spec.js # email-confirm callback test (hits Supabase signUp — rate-limited)
+```
+
 ## Architecture
 
 ### Routing (`src/App.jsx`)
@@ -60,14 +65,14 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 | `userEvents` | Events for current user where `deletedAt` is null |
 | `deletedEvents` | Soft-deleted events for current user (the Litter Box) |
 | `familyMembers` | Members from `family_members` table for current user's family account |
-| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents, showCatHolidays }` |
+| `prefs` | `{ theme, showFederalHolidays, showInternationalHolidays, showFamilyEvents, showCatHolidays, showUsPopularHolidays }` |
 | `catFact` / `catFactDate` | Daily cat fact — same fact all day, randomised on page refresh |
 | `register(userData)` | `supabase.auth.signUp`; sets `pendingUser`; returns `{ success, error? }` |
 | `login(usernameOrEmail, password)` | Resolves username → email via `get_email_by_username` RPC, then `signInWithPassword`; returns `{ success, error? }` |
 | `logout()` | `supabase.auth.signOut()`; state cleared by `onAuthStateChange` |
 | `updateProfile(updates)` | Patches `user_profiles`; also calls `supabase.auth.updateUser` if `email` changes |
 | `addEvent / updateEvent / deleteEvent / restoreEvent / emptyLitterBox` | Full CRUD on `user_events`; `deleteEvent` is a soft delete (`deleted_at`) |
-| `updatePrefs(updates)` | Merges into `prefs`; if `theme` changes, sets `data-theme` on `<html>` **and persists to `user_profiles.theme`** |
+| `updatePrefs(updates)` | Merges into `prefs`; persists `theme` to `user_profiles.theme` and all toggle flags to `user_profiles.calendar_prefs` (JSONB) |
 | `getDailyCatFact()` | Fetches from `cat-fact.herokuapp.com`; falls back to hardcoded strings on failure. Returns same fact all day; rotates on page refresh. |
 | `saveDailyCatFact(payload)` | Persists a cat fact string to `user_profiles.daily_cat_fact` |
 | `addFamilyMember` / `removeFamilyMember` | Creates `family_accounts` row if needed; inserts/deletes `family_members` |
@@ -128,5 +133,5 @@ Design reference lives in `../Client/skeleton/`:
 - Email / SMS notifications (toggle exists in `ProfilePage`; nothing is wired)
 - Notification timing options (2 days prior, day-of)
 - Allow Permissions page (button stub on `HomePage`)
-- `prefs` fields other than `theme` not yet persisted to Supabase
+- `prefs` calendar toggles now persisted via `user_profiles.calendar_prefs` (JSONB) — fully wired
 - Cat images for profile pictures and `ErrorPage` (events already use `CatImagePicker`)
