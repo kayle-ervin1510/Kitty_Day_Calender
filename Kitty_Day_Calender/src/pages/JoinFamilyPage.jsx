@@ -71,6 +71,24 @@ export default function JoinFamilyPage() {
     )
   }
 
+  if (user && details?.found && details.isOwner) {
+    return (
+      <div className="page">
+        <div className="card" style={{ textAlign: 'center', padding: '2rem', maxWidth: '420px', margin: '2rem auto' }}>
+          <p style={{ fontSize: '2.5rem' }}>😸</p>
+          <h2>That&apos;s your own invite!</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            This link was created for <strong>{details.memberName}</strong> to join your family calendar —
+            you can&apos;t accept your own invite. Share it with them instead.
+          </p>
+          <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => navigate('/family')}>
+            Back to Family
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (!token || !details?.found) {
     return (
       <div className="page">

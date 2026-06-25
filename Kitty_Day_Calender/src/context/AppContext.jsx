@@ -430,8 +430,9 @@ export function AppProvider({ children }) {
   }
 
   async function removeFamilyMember(id) {
-    const { error } = await supabase.from('family_members').delete().eq('id', id)
+    const { data, error } = await supabase.rpc('remove_family_member_and_cleanup', { p_member_id: id })
     if (error) return { success: false, error: error.message }
+    if (!data?.success) return { success: false, error: data?.error }
     setFamilyMembers(prev => prev.filter(m => m.id !== id))
     return { success: true }
   }

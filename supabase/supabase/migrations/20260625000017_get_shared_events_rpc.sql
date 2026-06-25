@@ -8,7 +8,7 @@ language sql
 security definer
 set search_path = public
 as $$
-  select ue.*
+  select distinct on (ue.id) ue.*
   from user_events ue
   join family_accounts fa on fa.owner_id = ue.user_id
   join family_members fm on fm.family_account_id = fa.id
@@ -16,7 +16,7 @@ as $$
     and fm.linked_user_id is not null
     and ue.family_visible = true
     and ue.deleted_at is null
-  order by ue.date;
+  order by ue.id, ue.date;
 $$;
 
 grant execute on function get_shared_events_for_user() to authenticated;
