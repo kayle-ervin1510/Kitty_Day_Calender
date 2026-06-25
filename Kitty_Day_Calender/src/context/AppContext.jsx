@@ -445,7 +445,7 @@ export function AppProvider({ children }) {
 
     const token = existing?.token ?? null
     if (token) {
-      return { success: true, url: `${window.location.origin}/family/join?token=${token}` }
+      return { success: true, url: `${import.meta.env.VITE_APP_URL || window.location.origin}/family/join?token=${token}` }
     }
 
     const { data, error } = await supabase
@@ -455,7 +455,7 @@ export function AppProvider({ children }) {
       .single()
 
     if (error) return { success: false, error: error.message }
-    return { success: true, url: `${window.location.origin}/family/join?token=${data.token}` }
+    return { success: true, url: `${import.meta.env.VITE_APP_URL || window.location.origin}/family/join?token=${data.token}` }
   }
 
   async function acceptInvite(token) {
