@@ -95,6 +95,7 @@ export default function ContactPage() {
           <div>
             <h3>Enjoying Kitty Day Calendar?</h3>
             <p>Leave us a review on Google Play and help other cat lovers find us!</p>
+            <p className="contact-play-coming-soon">A downloadable app, coming to a phone near you</p>
           </div>
           <a
             href="https://play.google.com/store"

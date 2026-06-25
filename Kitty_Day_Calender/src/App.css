@@ -612,6 +612,7 @@
 .contact-play-icon { font-size: 2rem; }
 .contact-play-inner h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; }
 .contact-play-inner p { font-size: 0.9rem; color: var(--text-secondary); }
+.contact-play-coming-soon { font-style: italic; margin-top: 0.25rem; }
 .contact-play-inner .btn { margin-left: auto; white-space: nowrap; }
 
 .contact-back {
