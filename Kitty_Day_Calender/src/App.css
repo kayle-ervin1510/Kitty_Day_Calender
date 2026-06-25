@@ -593,6 +593,12 @@
   color: var(--text-secondary);
   line-height: 1.5;
 }
+.contact-card-note {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 0.35rem;
+}
 
 .contact-play {
   margin-top: 0.5rem;

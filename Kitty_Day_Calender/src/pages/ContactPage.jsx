@@ -22,6 +22,7 @@ const CONTACTS = [
     value: 'support_example@kittydaycalendar.com',
     href: 'mailto:support_example@kittydaycalendar.com',
     desc: 'Reach our support team directly. We respond within 1–2 business days.',
+    note: 'Note: These are placeholders for the real thing.',
   },
   {
     icon: '📞',
@@ -29,6 +30,7 @@ const CONTACTS = [
     value: '+1 (555) 555-5555',
     href: 'tel:+15555555555',
     desc: 'Available Monday – Friday, 9 am – 5 pm EST.',
+    note: 'Note: These are placeholders for the real thing.',
   },
   {
     icon: 'github',
@@ -43,6 +45,7 @@ const CONTACTS = [
     value: 'linkedin.com/example/company/kittydaycalendar',
     href: 'https://linkedin.com/example/company/kittydaycalendar',
     desc: 'Follow us for product updates and team news.',
+    note: 'Note: These are placeholders for the real thing.',
   },
 ]
 
@@ -80,6 +83,7 @@ export default function ContactPage() {
               <p className="contact-card-label">{c.label}</p>
               <p className="contact-card-value">{c.value}</p>
               <p className="contact-card-desc">{c.desc}</p>
+              {c.note && <p className="contact-card-note">{c.note}</p>}
             </div>
           </a>
         ))}
