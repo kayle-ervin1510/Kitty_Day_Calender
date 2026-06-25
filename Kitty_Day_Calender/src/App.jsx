@@ -14,6 +14,7 @@ import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import LitterBoxPage from './pages/LitterBoxPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import JoinFamilyPage from './pages/JoinFamilyPage'
 import ErrorPage from './pages/ErrorPage'
 import './App.css'
 
@@ -64,6 +65,7 @@ function AppRoutes() {
         <Route path="/events/:id/edit" element={<EditEventPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/family" element={<FamilyPage />} />
+        <Route path="/family/join" element={<JoinFamilyPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/litter-box" element={<LitterBoxPage />} />

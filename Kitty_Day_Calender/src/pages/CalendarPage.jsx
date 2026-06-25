@@ -382,7 +382,7 @@ function addDays(y, m, d, n) {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function CalendarPage() {
-  const { user, userEvents, familyMembers, prefs, updatePrefs, getDailyCatFact, deleteEvent, saveDailyCatFact, refreshProfile } = useApp()
+  const { user, userEvents, sharedEvents, familyMembers, prefs, updatePrefs, getDailyCatFact, deleteEvent, saveDailyCatFact, refreshProfile } = useApp()
   const navigate = useNavigate()
 
   const today = new Date()
@@ -459,11 +459,18 @@ export default function CalendarPage() {
     return new Date(y, m, d) < new Date(today.getFullYear(), today.getMonth(), today.getDate())
   }
   function getEventsForDate(y, m, d) {
-    return userEvents.filter(e => {
+    const own = userEvents.filter(e => {
       if (!e.date) return false
       const dt = new Date(e.date + 'T00:00:00')
       return dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d
     })
+    if (!prefs.showFamilyEvents) return own
+    const shared = sharedEvents.filter(e => {
+      if (!e.date) return false
+      const dt = new Date(e.date + 'T00:00:00')
+      return dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d
+    })
+    return [...own, ...shared]
   }
   function getHolidaysForDate(y, m, d) {
     const out = []

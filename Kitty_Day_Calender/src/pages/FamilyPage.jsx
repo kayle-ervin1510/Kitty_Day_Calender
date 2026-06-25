@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
 export default function FamilyPage() {
-  const { user, familyMembers, updateProfile, addFamilyMember, removeFamilyMember } = useApp()
+  const { user, familyMembers, updateProfile, addFamilyMember, removeFamilyMember, generateInvite } = useApp()
   const navigate = useNavigate()
 
   const [removing, setRemoving]   = useState(null)
@@ -14,6 +14,10 @@ export default function FamilyPage() {
   const [newEmail, setNewEmail]   = useState('')
   const [newPhone, setNewPhone]   = useState('')
   const [addError, setAddError]   = useState('')
+
+  const [inviteLinks,   setInviteLinks]   = useState({})
+  const [inviteLoading, setInviteLoading] = useState(null)
+  const [copiedId,      setCopiedId]      = useState(null)
 
   const isFamily = user?.isFamilyAccount ?? false
 
@@ -46,6 +50,20 @@ export default function FamilyPage() {
   async function handleConfirmRemove(id) {
     await removeFamilyMember(id)
     setRemoving(null)
+  }
+
+  async function handleGetInviteLink(m) {
+    setInviteLoading(m.id)
+    const result = await generateInvite(m.id, m.email)
+    setInviteLoading(null)
+    if (!result.success) { flash('Could not generate invite link.'); return }
+    setInviteLinks(prev => ({ ...prev, [m.id]: result.url }))
+  }
+
+  function handleCopy(id, url) {
+    navigator.clipboard.writeText(url)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
   }
 
   return (
@@ -103,17 +121,48 @@ export default function FamilyPage() {
                   <div key={m.id} className="card family-member-row">
                     <span className="family-member-pic">🐱</span>
                     <div className="family-member-info">
-                      <span className="family-member-name">{m.name}</span>
+                      <span className="family-member-name">
+                        {m.name}
+                        {m.linkedUserId && (
+                          <span className="family-member-linked">✓ Linked</span>
+                        )}
+                      </span>
                       {m.email && (
                         <span className="family-member-detail">{m.email}</span>
                       )}
+                      {inviteLinks[m.id] && (
+                        <div className="family-invite-link-row">
+                          <input
+                            className="family-invite-link-input"
+                            readOnly
+                            value={inviteLinks[m.id]}
+                          />
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleCopy(m.id, inviteLinks[m.id])}
+                          >
+                            {copiedId === m.id ? 'Copied!' : 'Copy'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => setRemoving(m.id)}
-                    >
-                      Remove
-                    </button>
+                    <div className="family-member-actions">
+                      {!m.linkedUserId && m.email && (
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          disabled={inviteLoading === m.id}
+                          onClick={() => handleGetInviteLink(m)}
+                        >
+                          {inviteLoading === m.id ? '...' : 'Invite Link'}
+                        </button>
+                      )}
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => setRemoving(m.id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

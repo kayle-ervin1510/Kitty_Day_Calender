@@ -63,6 +63,7 @@ function normalizeMember(row) {
     email:                row.email,
     phone:                row.phone,
     notificationsEnabled: row.notifications_enabled,
+    linkedUserId:         row.linked_user_id ?? null,
     createdAt:            row.created_at,
   }
 }
@@ -76,6 +77,7 @@ export function AppProvider({ children }) {
   const [events, setEvents]                   = useState([])
   const [familyMembers, setFamilyMembers]     = useState([])
   const [familyAccountId, setFamilyAccountId] = useState(null)
+  const [sharedEvents, setSharedEvents]       = useState([])
   const [prefs, setPrefs] = useState({
     theme: 'light',
     showFederalHolidays: false,
@@ -107,6 +109,7 @@ export function AppProvider({ children }) {
         setEvents([])
         setFamilyMembers([])
         setFamilyAccountId(null)
+        setSharedEvents([])
         setInitializing(false)
       }
     })
@@ -176,6 +179,16 @@ export function AppProvider({ children }) {
         .eq('family_account_id', faId)
       setFamilyMembers((members || []).map(normalizeMember))
     }
+
+    // Fetch family-visible events shared WITH this user by accounts they've been linked to
+    const { data: sharedEvData } = await supabase
+      .from('user_events')
+      .select('*')
+      .eq('family_visible', true)
+      .is('deleted_at', null)
+      .neq('user_id', profile.id)
+      .order('date')
+    setSharedEvents((sharedEvData || []).map(normalizeEvent))
 
     setInitializing(false)
   }
@@ -418,6 +431,50 @@ export function AppProvider({ children }) {
     return { success: true }
   }
 
+  async function generateInvite(memberId, email) {
+    const faId = await ensureFamilyAccount()
+    if (!faId) return { success: false, error: 'Could not find family account.' }
+
+    // Reuse an existing pending invite for this member if one exists
+    const { data: existing } = await supabase
+      .from('family_invites')
+      .select('token')
+      .eq('family_member_id', memberId)
+      .is('accepted_at', null)
+      .maybeSingle()
+
+    const token = existing?.token ?? null
+    if (token) {
+      return { success: true, url: `${window.location.origin}/family/join?token=${token}` }
+    }
+
+    const { data, error } = await supabase
+      .from('family_invites')
+      .insert({ family_account_id: faId, family_member_id: memberId, invited_email: email })
+      .select('token')
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    return { success: true, url: `${window.location.origin}/family/join?token=${data.token}` }
+  }
+
+  async function acceptInvite(token) {
+    const { data, error } = await supabase.rpc('accept_family_invite', { p_token: token })
+    if (error) return { success: false, error: error.message }
+    if (!data.success) return { success: false, error: data.error }
+
+    // Refresh shared events now that the link is established
+    const { data: sharedEvData } = await supabase
+      .from('user_events')
+      .select('*')
+      .eq('family_visible', true)
+      .is('deleted_at', null)
+      .neq('user_id', user.id)
+      .order('date')
+    setSharedEvents((sharedEvData || []).map(normalizeEvent))
+    return { success: true }
+  }
+
   // ── Prefs & cat fact ───────────────────────────────────────────────────────
 
   async function refreshProfile() {
@@ -506,13 +563,13 @@ export function AppProvider({ children }) {
     <AppContext.Provider value={{
       user, pendingUser, initializing,
       isYearOfCat: isCurrentlyYearOfCat(),
-      userEvents, deletedEvents, familyMembers,
+      userEvents, deletedEvents, familyMembers, sharedEvents,
       prefs, catFact, catFactDate,
       getDailyCatFact,
       register, login, logout, resetPassword, changePassword, updateProfile, saveDailyCatFact, refreshProfile,
       addEvent, updateEvent, deleteEvent, restoreEvent, emptyLitterBox,
       updatePrefs,
-      addFamilyMember, removeFamilyMember,
+      addFamilyMember, removeFamilyMember, generateInvite, acceptInvite,
     }}>
       {children}
     </AppContext.Provider>
