@@ -180,14 +180,10 @@ export function AppProvider({ children }) {
       setFamilyMembers((members || []).map(normalizeMember))
     }
 
-    // Fetch family-visible events shared WITH this user by accounts they've been linked to
-    const { data: sharedEvData } = await supabase
-      .from('user_events')
-      .select('*')
-      .eq('family_visible', true)
-      .is('deleted_at', null)
-      .neq('user_id', profile.id)
-      .order('date')
+    // Fetch family-visible events shared WITH this user by accounts they've been linked to.
+    // Uses a security-definer RPC to bypass the RLS chain issue where family_accounts
+    // blocks non-owners, causing the direct query to silently return nothing.
+    const { data: sharedEvData } = await supabase.rpc('get_shared_events_for_user')
     setSharedEvents((sharedEvData || []).map(normalizeEvent))
 
     setInitializing(false)
@@ -473,13 +469,7 @@ export function AppProvider({ children }) {
     if (!data.success) return { success: false, error: data.error }
 
     // Refresh shared events now that the link is established
-    const { data: sharedEvData } = await supabase
-      .from('user_events')
-      .select('*')
-      .eq('family_visible', true)
-      .is('deleted_at', null)
-      .neq('user_id', user.id)
-      .order('date')
+    const { data: sharedEvData } = await supabase.rpc('get_shared_events_for_user')
     setSharedEvents((sharedEvData || []).map(normalizeEvent))
     return { success: true }
   }
