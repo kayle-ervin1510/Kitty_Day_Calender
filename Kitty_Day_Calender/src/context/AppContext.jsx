@@ -442,6 +442,9 @@ export function AppProvider({ children }) {
     if (error) return { success: false, error: error.message }
     if (!data?.success) return { success: false, error: data?.error }
     setFamilyMembers(prev => prev.filter(m => m.id !== id))
+    // Re-fetch shared events so removed member's events disappear immediately
+    const { data: sharedEvData } = await supabase.rpc('get_shared_events_for_user')
+    setSharedEvents((sharedEvData || []).map(normalizeEvent))
     return { success: true }
   }
 

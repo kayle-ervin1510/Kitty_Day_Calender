@@ -5,9 +5,10 @@ import { useApp } from '../context/AppContext'
 
 export default function JoinFamilyPage() {
   const [searchParams] = useSearchParams()
-  const token = searchParams.get('token')
+  const token      = searchParams.get('token')
+  const fromLogin  = searchParams.get('from_login') === '1'
   const { user, initializing, acceptInvite } = useApp()
-  const navigate = useNavigate()
+  const navigate   = useNavigate()
 
   const [details,  setDetails]  = useState(null)
   const [loading,  setLoading]  = useState(true)
@@ -15,11 +16,22 @@ export default function JoinFamilyPage() {
   const [error,    setError]    = useState('')
   const [done,     setDone]     = useState(false)
 
+  // Step 1: Always sign out and redirect to login — no auto-accepting while
+  // already logged in as whoever happened to open the link.
   useEffect(() => {
-    if (!token) { setLoading(false); return }
+    if (fromLogin) return          // already went through the login step
+    const redirectUrl = new URL(window.location.href)
+    redirectUrl.searchParams.set('from_login', '1')
+    sessionStorage.setItem('kitty_join_redirect', redirectUrl.toString())
+    supabase.auth.signOut().then(() => navigate('/login'))
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Step 2: Load invite details once we're back from login
+  useEffect(() => {
+    if (!fromLogin || !token) { setLoading(false); return }
     supabase.rpc('get_invite_details', { p_token: token })
       .then(({ data }) => { setDetails(data); setLoading(false) })
-  }, [token])
+  }, [token, fromLogin])
 
   async function handleAccept() {
     setJoining(true)
@@ -30,32 +42,38 @@ export default function JoinFamilyPage() {
     setDone(true)
   }
 
-  if (initializing || loading) {
+  // ── Waiting to be redirected to login ─────────────────────────────────────
+  if (!fromLogin) {
     return (
       <div className="page">
         <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
           <p style={{ fontSize: '2rem' }}>🐱</p>
-          <p style={{ color: 'var(--text-secondary)' }}>Loading invite...</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Redirecting to sign in…</p>
         </div>
       </div>
     )
   }
 
+  // ── Loading invite / session ───────────────────────────────────────────────
+  if (initializing || loading) {
+    return (
+      <div className="page">
+        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+          <p style={{ fontSize: '2rem' }}>🐱</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Loading invite…</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Not logged in after the login redirect (e.g. they closed the tab) ─────
   if (!user) {
     return (
       <div className="page">
         <div className="card" style={{ maxWidth: '460px', margin: '2rem auto', padding: '2rem', textAlign: 'center' }}>
           <p style={{ fontSize: '2.5rem' }}>🐾</p>
-          <h2>Family Invite</h2>
-          {details?.found && (
-            <p style={{ color: 'var(--text-secondary)' }}>
-              <strong>{details.ownerName}</strong> has invited <strong>{details.memberName}</strong> to
-              join their family calendar.
-            </p>
-          )}
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-            Log in or sign up to accept this invite.
-          </p>
+          <h2>Sign in to accept</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>You need to be signed in to accept a family invite.</p>
           <button
             className="btn btn-primary"
             style={{ marginTop: '1rem' }}
@@ -64,31 +82,14 @@ export default function JoinFamilyPage() {
               navigate('/login')
             }}
           >
-            Log in to Accept
+            Log in
           </button>
         </div>
       </div>
     )
   }
 
-  if (user && details?.found && details.isOwner) {
-    return (
-      <div className="page">
-        <div className="card" style={{ textAlign: 'center', padding: '2rem', maxWidth: '420px', margin: '2rem auto' }}>
-          <p style={{ fontSize: '2.5rem' }}>😸</p>
-          <h2>That&apos;s your own invite!</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            This link was created for <strong>{details.memberName}</strong> to join your family calendar —
-            you can&apos;t accept your own invite. Share it with them instead.
-          </p>
-          <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => navigate('/family')}>
-            Back to Family
-          </button>
-        </div>
-      </div>
-    )
-  }
-
+  // ── Invalid token ──────────────────────────────────────────────────────────
   if (!token || !details?.found) {
     return (
       <div className="page">
@@ -104,6 +105,26 @@ export default function JoinFamilyPage() {
     )
   }
 
+  // ── Owner trying to accept their own invite ────────────────────────────────
+  if (details.isOwner) {
+    return (
+      <div className="page">
+        <div className="card" style={{ textAlign: 'center', padding: '2rem', maxWidth: '420px', margin: '2rem auto' }}>
+          <p style={{ fontSize: '2.5rem' }}>😹</p>
+          <h2>Mew, you own this account!</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            You can&apos;t link to yourself — this invite was made for someone else to join your calendar.
+            Share it with them instead.
+          </p>
+          <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => navigate('/family')}>
+            Back to Family
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Already accepted ───────────────────────────────────────────────────────
   if (details.accepted && !done) {
     return (
       <div className="page">
@@ -119,6 +140,7 @@ export default function JoinFamilyPage() {
     )
   }
 
+  // ── Success ────────────────────────────────────────────────────────────────
   if (done) {
     return (
       <div className="page">
@@ -127,7 +149,7 @@ export default function JoinFamilyPage() {
           <h2>You&apos;re in the family!</h2>
           <p style={{ color: 'var(--text-secondary)' }}>
             You can now see <strong>{details.ownerName}</strong>&apos;s shared events in your calendar.
-            Make sure <strong>View Family Events</strong> is turned on in the calendar.
+            Make sure <strong>View Family Events</strong> is turned on.
           </p>
           <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => navigate('/calendar')}>
             Go to Calendar
@@ -137,6 +159,7 @@ export default function JoinFamilyPage() {
     )
   }
 
+  // ── Accept form ────────────────────────────────────────────────────────────
   return (
     <div className="page">
       <div className="card" style={{ maxWidth: '460px', margin: '2rem auto', padding: '2rem' }}>
@@ -152,7 +175,7 @@ export default function JoinFamilyPage() {
         {error && <p className="form-error" style={{ textAlign: 'center' }}>{error}</p>}
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
           <button className="btn btn-primary" onClick={handleAccept} disabled={joining}>
-            {joining ? 'Joining...' : 'Accept Invite 🐾'}
+            {joining ? 'Joining…' : 'Accept Invite 🐾'}
           </button>
           <button className="btn btn-secondary" onClick={() => navigate('/home')}>
             Decline
