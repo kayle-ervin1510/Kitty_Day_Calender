@@ -30,8 +30,9 @@ function normalizeProfile(row) {
     notificationsEnabled: row.notifications_enabled,
     notificationMethod:   row.notification_method,
     isFamilyAccount:      row.is_family_account,
-    theme:                row.theme          ?? 'light',
-    dailyCatFact:         row.daily_cat_fact ?? null,
+    theme:                row.theme           ?? 'light',
+    dailyCatFact:         row.daily_cat_fact  ?? null,
+    calendarPrefs:        row.calendar_prefs  ?? null,
     createdAt:            row.created_at,
   }
 }
@@ -152,7 +153,11 @@ export function AppProvider({ children }) {
     const activeTheme = (savedTheme === 'year-of-cat' && !isCurrentlyYearOfCat()) ? 'light' : savedTheme
     setUser({ ...normalized, theme: activeTheme })
     setPendingUser(null)
-    setPrefs(prev => ({ ...prev, theme: activeTheme }))
+    setPrefs(prev => ({
+      ...prev,
+      ...(normalized.calendarPrefs ?? {}),
+      theme: activeTheme,
+    }))
     document.documentElement.setAttribute('data-theme', activeTheme)
 
     const [eventsResult, faResult] = await Promise.all([
@@ -439,15 +444,24 @@ export function AppProvider({ children }) {
   async function updatePrefs(updates) {
     const next = { ...prefs, ...updates }
     setPrefs(next)
+
     if (updates.theme) {
       document.documentElement.setAttribute('data-theme', updates.theme)
-      if (user) {
-        await supabase
-          .from('user_profiles')
-          .update({ theme: updates.theme })
-          .eq('id', user.id)
-      }
     }
+
+    if (!user) return
+
+    const dbUpdates = {}
+    if (updates.theme) dbUpdates.theme = updates.theme
+
+    // Persist all toggle flags together in calendar_prefs
+    const { theme: _ignored, ...flags } = next
+    dbUpdates.calendar_prefs = flags
+
+    await supabase
+      .from('user_profiles')
+      .update(dbUpdates)
+      .eq('id', user.id)
   }
 
   async function getDailyCatFact() {
