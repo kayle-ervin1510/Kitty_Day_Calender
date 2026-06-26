@@ -7,35 +7,28 @@ export default function AuthCallbackPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get('code')
+    const params = new URLSearchParams(window.location.search)
+    const code   = params.get('code')
+    const type   = params.get('type')
 
     if (!code) {
       navigate('/login', { replace: true })
       return
     }
 
-    // Register BEFORE exchangeCodeForSession so we don't miss the event.
-    // PASSWORD_RECOVERY → send to /reset-password.
-    // SIGNED_IN → normal email confirm; AppContext sets user and ProtectedLayout
-    //             redirects to /home, but we navigate explicitly here too for speed.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        subscription.unsubscribe()
+    supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
+      if (err) {
+        setError(err.message)
+        return
+      }
+      // type=recovery is set by resetPasswordForEmail's redirectTo — send to
+      // the new-password form. All other flows (email confirm) go to /home.
+      if (type === 'recovery') {
         navigate('/reset-password', { replace: true })
-      } else if (event === 'SIGNED_IN') {
-        subscription.unsubscribe()
+      } else {
         navigate('/home', { replace: true })
       }
     })
-
-    supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
-      if (err) {
-        subscription.unsubscribe()
-        setError(err.message)
-      }
-    })
-
-    return () => subscription.unsubscribe()
   }, [navigate])
 
   if (error) {
