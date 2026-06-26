@@ -1,0 +1,63 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Profile Kitty Day Calendar" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e7]
+        - text: Kitty Day Calendar
+      - generic [ref=e8]:
+        - link "Calendar" [ref=e9] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e10] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box" [ref=e12] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e13]
+          - text: Litter Box
+        - button "Log Out" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - button "← Back" [ref=e20] [cursor=pointer]
+        - heading "Add Event" [level=1] [ref=e21]
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Event Name *
+          - textbox "Event Name *" [ref=e25]:
+            - /placeholder: e.g. Vet appointment
+        - generic [ref=e26]:
+          - generic [ref=e27]: Date *
+          - textbox "Date *" [ref=e28]: 2026-06-26
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - generic [ref=e31]: Start Time
+            - textbox "Start Time" [ref=e32]
+          - generic [ref=e33]:
+            - generic [ref=e34]: End Time
+            - textbox "End Time" [ref=e35]
+        - generic [ref=e37] [cursor=pointer]:
+          - generic [ref=e38]: Receive Notifications?
+          - switch "Receive Notifications?" [ref=e39]
+        - generic [ref=e40]:
+          - generic [ref=e41]: Mark as Holiday or Birthday?
+          - generic [ref=e42]:
+            - button "🗓️ Regular event" [ref=e43] [cursor=pointer]:
+              - generic [ref=e44]: 🗓️
+              - generic [ref=e45]: Regular event
+            - button "🎉 Holiday" [active] [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: 🎉
+              - generic [ref=e48]: Holiday
+            - button "🎂 Birthday" [ref=e49] [cursor=pointer]:
+              - generic [ref=e50]: 🎂
+              - generic [ref=e51]: Birthday
+        - generic [ref=e52]:
+          - generic [ref=e53]: Add Image 🐆
+          - button "Find me a Wild Cat 🐆" [ref=e55] [cursor=pointer]
+        - generic [ref=e57] [cursor=pointer]:
+          - generic [ref=e58]: Make event public to family?
+          - switch "Make event public to family?" [ref=e59]
+        - generic [ref=e60]:
+          - button "Create Event! 🐾" [ref=e61] [cursor=pointer]
+          - button "Cancel" [ref=e62] [cursor=pointer]

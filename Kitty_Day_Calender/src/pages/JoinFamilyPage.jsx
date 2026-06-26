@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
+import HttpCatImage from '../components/HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 export default function JoinFamilyPage() {
   const [searchParams] = useSearchParams()
@@ -13,7 +15,8 @@ export default function JoinFamilyPage() {
   const [details,  setDetails]  = useState(null)
   const [loading,  setLoading]  = useState(true)
   const [joining,  setJoining]  = useState(false)
-  const [error,    setError]    = useState('')
+  const [error,       setError]       = useState('')
+  const [errorStatus, setErrorStatus] = useState(null)
   const [done,     setDone]     = useState(false)
 
   // Step 1: Always sign out and redirect to login — no auto-accepting while
@@ -38,7 +41,7 @@ export default function JoinFamilyPage() {
     setError('')
     const result = await acceptInvite(token)
     setJoining(false)
-    if (!result.success) { setError(result.error); return }
+    if (!result.success) { setError(result.error); setErrorStatus(result.status ?? null); return }
     setDone(true)
   }
 
@@ -172,7 +175,14 @@ export default function JoinFamilyPage() {
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '0.5rem' }}>
           Accepting lets you see their shared events in your calendar.
         </p>
-        {error && <p className="form-error" style={{ textAlign: 'center' }}>{error}</p>}
+        {error && (
+          <div className="form-error-block">
+            {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
+              <HttpCatImage status={errorStatus} className="form-http-cat" />
+            )}
+            <p className="form-error" style={{ textAlign: 'center' }}>{error}</p>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
           <button className="btn btn-primary" onClick={handleAccept} disabled={joining}>
             {joining ? 'Joining…' : 'Accept Invite 🐾'}

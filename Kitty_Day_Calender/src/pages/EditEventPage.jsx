@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import oopsCat from '../assets/oops-cat.png'
 import CatImagePicker from '../components/CatImagePicker'
 import HttpCatImage from '../components/HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 function LitterBox() {
   return (
@@ -79,7 +80,8 @@ export default function EditEventPage() {
   const [eventType,  setEventType]  = useState(event?.eventType  ?? 'other')
   const [imageUrl,   setImageUrl]   = useState(event?.imageUrl   ?? null)
   const [isPublic,   setIsPublic]   = useState(event?.familyVisible ?? false)
-  const [error,      setError]      = useState('')
+  const [error,       setError]       = useState('')
+  const [errorStatus, setErrorStatus] = useState(null)
 
   // Delete confirmation flow: 'idle' | 'confirming' | 'deleted'
   const [deleteState, setDeleteState] = useState('idle')
@@ -95,6 +97,7 @@ export default function EditEventPage() {
     if (!name.trim()) { setError('Please give your event a name.'); return }
     if (!date)        { setError('Please pick a date for your event.'); return }
     setError('')
+    setErrorStatus(null)
 
     const result = await updateEvent(id, {
       name: name.trim(),
@@ -114,7 +117,7 @@ export default function EditEventPage() {
       familyVisible: isPublic,
     })
 
-    if (!result?.success) { setError(result?.error || 'Failed to save event.'); return }
+    if (!result?.success) { setError(result?.error || 'Failed to save event.'); setErrorStatus(result?.status ?? null); return }
 
     navigate('/calendar')
   }
@@ -355,7 +358,14 @@ export default function EditEventPage() {
             </label>
           </div>
 
-          {error && <p className="form-error">{error}</p>}
+          {error && (
+            <div className="form-error-block">
+              {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
+                <HttpCatImage status={errorStatus} className="form-http-cat" />
+              )}
+              <p className="form-error">{error}</p>
+            </div>
+          )}
 
           <div className="event-form-actions">
             <button type="submit" className="btn btn-primary btn-lg">

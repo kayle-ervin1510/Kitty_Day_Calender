@@ -1,0 +1,48 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Profile Kitty Day Calendar" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e7]
+        - text: Kitty Day Calendar
+      - generic [ref=e8]:
+        - link "Calendar" [ref=e9] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e10] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box" [ref=e12] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e13]
+          - text: Litter Box
+        - button "Sign Out" [ref=e16] [cursor=pointer]
+  - generic [ref=e38]:
+    - img "Lucky cat waving goodbye" [ref=e44]
+    - paragraph [ref=e45]: All right...see you soon!
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img "Kitty Day Calendar cat" [ref=e20]
+        - heading "Welcome to Kitty Day Calendar, Kyla!" [level=1] [ref=e21]
+        - paragraph [ref=e22]: Your purr-fectly fun way to track your schedule.
+      - generic [ref=e23]:
+        - heading "About Kitty Day Calendar" [level=2] [ref=e24]
+        - paragraph [ref=e25]:
+          - text: Everyone can have a calendar app, but can everyone have a
+          - emphasis [ref=e26]: Kitty Day Calendar
+          - text: "? With Kitty Day Calendar you can manage your schedule and receive a unique cat fact every single day — plus an assortment of cute kitty images to keep things fun!"
+        - paragraph [ref=e27]:
+          - text: Mark a day as a
+          - strong [ref=e28]: Holiday
+          - text: or a
+          - strong [ref=e29]: Birthday
+          - text: and the app will show you a special cat image for that occasion. You can also set up notifications so we remind you of upcoming events — two days before and again on the day — via email or SMS.
+        - paragraph [ref=e30]: Create events, view National and International Holidays, edit or remove anything you like, and even set up a Family Account so your whole household can stay in sync. 🐾
+        - generic [ref=e31]:
+          - button "Add Event 🗓️" [ref=e32] [cursor=pointer]
+          - button "Go to My Calendar 📅" [ref=e33] [cursor=pointer]
+          - button "Allow Permissions for Kitty Day 🔔" [ref=e34] [cursor=pointer]
+        - paragraph [ref=e35]:
+          - text: Questions?
+          - button "Contact Us" [ref=e36] [cursor=pointer]

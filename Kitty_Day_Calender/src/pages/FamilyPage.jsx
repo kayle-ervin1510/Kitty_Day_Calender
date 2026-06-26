@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import HttpCatImage from '../components/HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 export default function FamilyPage() {
   const { user, familyMembers, updateProfile, addFamilyMember, removeFamilyMember, refreshFamilyMembers, generateInvite } = useApp()
@@ -10,10 +12,11 @@ export default function FamilyPage() {
   const [adding, setAdding]       = useState(false)
   const [savedMsg, setSavedMsg]   = useState('')
 
-  const [newName,  setNewName]    = useState('')
-  const [newEmail, setNewEmail]   = useState('')
-  const [newPhone, setNewPhone]   = useState('')
-  const [addError, setAddError]   = useState('')
+  const [newName,       setNewName]       = useState('')
+  const [newEmail,      setNewEmail]      = useState('')
+  const [newPhone,      setNewPhone]      = useState('')
+  const [addError,      setAddError]      = useState('')
+  const [addErrorStatus,setAddErrorStatus]= useState(null)
 
   const [inviteLinks,   setInviteLinks]   = useState({})
   const [inviteLoading, setInviteLoading] = useState(null)
@@ -28,7 +31,7 @@ export default function FamilyPage() {
 
   function resetAdd() {
     setAdding(false)
-    setNewName(''); setNewEmail(''); setNewPhone(''); setAddError('')
+    setNewName(''); setNewEmail(''); setNewPhone(''); setAddError(''); setAddErrorStatus(null)
   }
 
   async function handleAdd(e) {
@@ -41,7 +44,7 @@ export default function FamilyPage() {
       phone: newPhone.trim() || null,
     })
 
-    if (!result.success) { setAddError(result.error); return }
+    if (!result.success) { setAddError(result.error); setAddErrorStatus(result.status ?? null); return }
 
     resetAdd()
     flash(`${newName.trim()} has been added to your family! 🐾`)
@@ -219,7 +222,14 @@ export default function FamilyPage() {
                   </div>
                 </div>
 
-                {addError && <p className="form-error">{addError}</p>}
+                {addError && (
+                  <div className="form-error-block">
+                    {addErrorStatus && HTTP_CAT_SUPPORTED.has(addErrorStatus) && (
+                      <HttpCatImage status={addErrorStatus} className="form-http-cat" />
+                    )}
+                    <p className="form-error">{addError}</p>
+                  </div>
+                )}
 
                 <div className="family-add-actions">
                   <button type="submit" className="btn btn-primary">Add to Family 🐾</button>

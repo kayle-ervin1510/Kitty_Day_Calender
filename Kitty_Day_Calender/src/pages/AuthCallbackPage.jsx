@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import HttpCatImage from '../components/HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate()
-  const [error, setError] = useState(null)
+  const [error,       setError]       = useState(null)
+  const [errorStatus, setErrorStatus] = useState(null)
 
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get('code')
@@ -18,6 +21,7 @@ export default function AuthCallbackPage() {
       if (err) {
         localStorage.removeItem('kitty_reset_pending')
         setError(err.message)
+        setErrorStatus(err.status ?? null)
         return
       }
       const isRecovery = localStorage.getItem('kitty_reset_pending')
@@ -34,7 +38,10 @@ export default function AuthCallbackPage() {
     return (
       <div className="confirm-page">
         <div className="confirm-card card">
-          <div className="confirm-icon">😿</div>
+          {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus)
+            ? <HttpCatImage status={errorStatus} className="error-http-cat" />
+            : <div className="confirm-icon">😿</div>
+          }
           <h1>Confirmation Failed</h1>
           <p className="confirm-body">
             This link has expired or was already used. Please request a new one.

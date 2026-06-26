@@ -1,18 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import HttpCatImage from '../components/HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate()
   const { changePassword } = useApp()
   const [newPassword, setNewPassword]     = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError]   = useState('')
+  const [error,       setError]       = useState('')
+  const [errorStatus, setErrorStatus] = useState(null)
   const [success, setSuccess] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    setErrorStatus(null)
 
     if (newPassword.length < 6) {
       setError('Password must be at least 6 characters.')
@@ -26,6 +30,7 @@ export default function ResetPasswordPage() {
     const result = await changePassword(newPassword)
     if (!result.success) {
       setError(result.error)
+      setErrorStatus(result.status ?? null)
       return
     }
 
@@ -72,7 +77,14 @@ export default function ResetPasswordPage() {
                 required
               />
             </div>
-            {error && <p className="form-error">{error}</p>}
+            {error && (
+              <div className="form-error-block">
+                {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
+                  <HttpCatImage status={errorStatus} className="form-http-cat" />
+                )}
+                <p className="form-error">{error}</p>
+              </div>
+            )}
             <button type="submit" className="btn btn-primary btn-full btn-lg">
               Update Password 🐾
             </button>

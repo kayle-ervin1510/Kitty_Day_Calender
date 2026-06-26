@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useLocation } from 'react-router-dom'
+import HttpCatImage from '../components/HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 const CAT_PICS = ['🐱','😸','😺','😻','🙀','😼','😽','🐈','🐈‍⬛','🦁','🐯','🐅']
 const isUrl = str => typeof str === 'string' && str.startsWith('http')
@@ -93,13 +95,15 @@ export default function ProfilePage() {
   // Security state
   const [newPw,      setNewPw]      = useState('')
   const [confirmPw,  setConfirmPw]  = useState('')
-  const [securityMsg,   setSecurityMsg]   = useState('')
-  const [securityError, setSecurityError] = useState('')
+  const [securityMsg,         setSecurityMsg]         = useState('')
+  const [securityError,       setSecurityError]       = useState('')
+  const [securityErrorStatus, setSecurityErrorStatus] = useState(null)
 
   async function handleChangePassword(e) {
     e.preventDefault()
     setSecurityMsg('')
     setSecurityError('')
+    setSecurityErrorStatus(null)
     if (newPw.length < 6) { setSecurityError('Password must be at least 6 characters.'); return }
     if (newPw !== confirmPw) { setSecurityError('Passwords do not match.'); return }
     const result = await changePassword(newPw)
@@ -108,6 +112,7 @@ export default function ProfilePage() {
       setNewPw(''); setConfirmPw('')
     } else {
       setSecurityError(result.error)
+      setSecurityErrorStatus(result.status ?? null)
     }
   }
 
@@ -459,7 +464,14 @@ export default function ProfilePage() {
             />
           </div>
 
-          {securityError && <p className="form-error">{securityError}</p>}
+          {securityError && (
+            <div className="form-error-block">
+              {securityErrorStatus && HTTP_CAT_SUPPORTED.has(securityErrorStatus) && (
+                <HttpCatImage status={securityErrorStatus} className="form-http-cat" />
+              )}
+              <p className="form-error">{securityError}</p>
+            </div>
+          )}
           {securityMsg   && <p className="form-success">{securityMsg}</p>}
 
           <div className="profile-form-actions">

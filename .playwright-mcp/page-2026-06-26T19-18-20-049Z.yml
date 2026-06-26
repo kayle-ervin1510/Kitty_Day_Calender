@@ -1,0 +1,9 @@
+- generic [ref=e4]:
+  - img "HTTP 404 — Not Found"
+  - generic [ref=e5]:
+    - generic [ref=e6]: "404"
+    - generic [ref=e7]: Not Found
+  - paragraph [ref=e8]: Stand by while our kITties figure out what's up. 🐾
+  - generic [ref=e9]:
+    - button "Go Back" [ref=e10] [cursor=pointer]
+    - button "Go Home" [ref=e11] [cursor=pointer]

@@ -1,0 +1,27 @@
+- generic [ref=e46]:
+  - generic [ref=e47]:
+    - generic [ref=e48]: 🐱
+    - heading "Kitty Day Calendar" [level=1] [ref=e49]
+    - paragraph [ref=e50]: To log in, enter your username or email and password. New here? Please sign up!
+  - generic [ref=e51]:
+    - generic [ref=e52]:
+      - button "Sign In" [ref=e53] [cursor=pointer]
+      - button "Sign Up" [ref=e54] [cursor=pointer]
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]: Username or Email
+        - textbox "Username or Email" [ref=e58]:
+          - /placeholder: Enter your username or email
+          - text: wronguser@fake.com
+      - generic [ref=e59]:
+        - generic [ref=e60]: Password
+        - textbox "Password" [ref=e61]:
+          - /placeholder: Enter your password
+          - text: wrongpassword123
+      - paragraph [ref=e62]:
+        - button "Forgot password?" [ref=e63] [cursor=pointer]
+      - paragraph [ref=e68]: Invalid login credentials
+      - button "Sign In 🐾" [active] [ref=e64] [cursor=pointer]
+      - paragraph [ref=e65]:
+        - text: Don't have an account?
+        - button "Sign up here" [ref=e66] [cursor=pointer]

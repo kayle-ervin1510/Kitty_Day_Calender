@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import CatImagePicker from '../components/CatImagePicker'
+import HttpCatImage from '../components/HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 const NOTIFY_OPTIONS = [
   { value: '15min',  label: '15 minutes before' },
@@ -33,8 +35,9 @@ export default function AddEventPage() {
   const [eventType,  setEventType]  = useState('other')   // 'other' | 'holiday' | 'birthday'
   const [imageUrl,   setImageUrl]   = useState(null)
   const [isPublic,   setIsPublic]   = useState(false)
-  const [error,      setError]      = useState('')
-  const [saved,      setSaved]      = useState(false)
+  const [error,       setError]       = useState('')
+  const [errorStatus, setErrorStatus] = useState(null)
+  const [saved,       setSaved]       = useState(false)
 
   function toggleNotifyWhen(val) {
     setNotifyWhen(prev =>
@@ -47,6 +50,7 @@ export default function AddEventPage() {
     if (!name.trim()) { setError('Please give your event a name.'); return }
     if (!date)        { setError('Please pick a date for your event.'); return }
     setError('')
+    setErrorStatus(null)
 
     const result = await addEvent({
       name:      name.trim(),
@@ -66,7 +70,7 @@ export default function AddEventPage() {
       familyVisible: isPublic,
     })
 
-    if (!result.success) { setError(result.error || 'Failed to save event.'); return }
+    if (!result.success) { setError(result.error || 'Failed to save event.'); setErrorStatus(result.status ?? null); return }
 
     setSaved(true)
     setTimeout(() => navigate('/calendar'), 1800)
@@ -293,7 +297,14 @@ export default function AddEventPage() {
           </label>
         </div>
 
-        {error && <p className="form-error">{error}</p>}
+        {error && (
+          <div className="form-error-block">
+            {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
+              <HttpCatImage status={errorStatus} className="form-http-cat" />
+            )}
+            <p className="form-error">{error}</p>
+          </div>
+        )}
 
         <div className="event-form-actions">
           <button type="submit" className="btn btn-primary btn-lg">

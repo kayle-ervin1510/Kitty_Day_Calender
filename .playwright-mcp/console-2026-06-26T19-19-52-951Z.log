@@ -1,0 +1,4 @@
+[   10042ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://api.unsplash.com/photos/random?query=tiger%20wild%20cat&orientation=landscape:0
+[   10074ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://api.api-ninjas.com/v1/animals?name=tiger:0
+[   10075ms] [ERROR] Error: No image returned from Unsplash.
+    at g (https://kitty-day-calender.vercel.app/assets/index-Bpeh1R1C.js:45:47100) @ https://kitty-day-calender.vercel.app/assets/index-Bpeh1R1C.js:44
