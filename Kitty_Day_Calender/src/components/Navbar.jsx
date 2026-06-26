@@ -105,7 +105,7 @@ export default function Navbar() {
               )}
             </NavLink>
             <button onClick={handleLogoutClick} className="nav-link nav-logout">
-              Sign Out
+              Log Out
             </button>
           </div>
         </div>

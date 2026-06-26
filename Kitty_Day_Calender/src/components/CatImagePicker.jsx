@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import HttpCatImage from './HttpCatImage'
+import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
 
 const CAT_API_KEY      = import.meta.env.VITE_CAT_API_KEY
 const UNSPLASH_KEY     = import.meta.env.VITE_UNSPLASH_ACCESS_KEY
@@ -29,13 +31,15 @@ export default function CatImagePicker({ eventType, value, onChange }) {
   const [imageUrl,   setImageUrl]   = useState(value || null)
   const [wildFact,   setWildFact]   = useState('')
   const [wildName,   setWildName]   = useState('')
-  const [loading,    setLoading]    = useState(false)
-  const [error,      setError]      = useState('')
-  const [selected,   setSelected]   = useState(!!value)
+  const [loading,      setLoading]      = useState(false)
+  const [error,        setError]        = useState('')
+  const [errorStatus,  setErrorStatus]  = useState(null)
+  const [selected,     setSelected]     = useState(!!value)
 
   async function fetchCatImage() {
     setLoading(true)
     setError('')
+    setErrorStatus(null)
     setSelected(false)
 
     try {
@@ -44,6 +48,7 @@ export default function CatImagePicker({ eventType, value, onChange }) {
         const res  = await fetch('https://api.thecatapi.com/v1/images/search', {
           headers: { 'x-api-key': CAT_API_KEY },
         })
+        if (!res.ok) throw Object.assign(new Error('The Cat API error.'), { status: res.status })
         const data = await res.json()
         const url  = data[0]?.url
         if (!url) throw new Error('No image returned.')
@@ -66,8 +71,10 @@ export default function CatImagePicker({ eventType, value, onChange }) {
           ),
         ])
 
+        if (!imgRes.ok) throw Object.assign(new Error('Unsplash error.'), { status: imgRes.status })
+
         const imgData  = await imgRes.json()
-        const factData = await factRes.json()
+        const factData = factRes.ok ? await factRes.json() : []
 
         const url    = imgData?.urls?.regular
         const animal = factData?.[0]
@@ -80,6 +87,7 @@ export default function CatImagePicker({ eventType, value, onChange }) {
       }
     } catch (err) {
       setError('Couldn\'t fetch an image right now. Try again!')
+      setErrorStatus(err.status ?? null)
       console.error(err)
     } finally {
       setLoading(false)
@@ -154,7 +162,14 @@ export default function CatImagePicker({ eventType, value, onChange }) {
         </div>
       )}
 
-      {error && <p className="form-error">{error}</p>}
+      {error && (
+        <div className="form-error-block">
+          {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
+            <HttpCatImage status={errorStatus} className="form-http-cat" />
+          )}
+          <p className="form-error">{error}</p>
+        </div>
+      )}
     </div>
   )
 }
