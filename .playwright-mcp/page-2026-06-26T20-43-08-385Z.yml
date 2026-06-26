@@ -1,0 +1,60 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Profile Kitty Day Calendar" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e7]
+        - text: Kitty Day Calendar
+      - generic [ref=e8]:
+        - link "Calendar" [ref=e9] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e10] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box" [ref=e12] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e13]
+          - text: Litter Box
+        - button "Log Out" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: 🐱
+          - generic [ref=e22]: +
+          - generic [ref=e23]: 🐱
+        - generic [ref=e24]:
+          - heading "Family Account" [level=1] [ref=e25]
+          - paragraph [ref=e26]: Share your calendar with your whole household.
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - paragraph [ref=e30]: Family Account
+          - paragraph [ref=e31]: Active — family members can see your shared events.
+        - switch [checked] [ref=e32] [cursor=pointer]
+      - generic [ref=e70]: Test Member has been added to your family! 🐾
+      - button "↻ Refresh Members" [ref=e34] [cursor=pointer]
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - generic [ref=e37]: 🐱
+          - generic [ref=e39]: Kaylee
+          - generic [ref=e40]:
+            - button "Invite Link" [ref=e41] [cursor=pointer]
+            - button "Remove" [ref=e42] [cursor=pointer]
+        - generic [ref=e43]:
+          - generic [ref=e44]: 🐱
+          - generic [ref=e46]: Me
+          - generic [ref=e47]:
+            - button "Invite Link" [ref=e48] [cursor=pointer]
+            - button "Remove" [ref=e49] [cursor=pointer]
+        - generic [ref=e71]:
+          - generic [ref=e72]: 🐱
+          - generic [ref=e73]:
+            - generic [ref=e74]: Test Member
+            - generic [ref=e75]: testcat@example.com
+          - generic [ref=e76]:
+            - button "Invite Link" [ref=e77] [cursor=pointer]
+            - button "Remove" [ref=e78] [cursor=pointer]
+      - button "+ Add Family Member" [ref=e79] [cursor=pointer]
+      - paragraph [ref=e51]:
+        - button "← Back to Profile" [ref=e52] [cursor=pointer]

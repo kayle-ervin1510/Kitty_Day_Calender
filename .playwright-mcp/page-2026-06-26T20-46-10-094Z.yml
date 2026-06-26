@@ -1,0 +1,48 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Profile Kitty Day Calendar" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e7]
+        - text: Kitty Day Calendar
+      - generic [ref=e8]:
+        - link "Calendar" [ref=e9] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e10] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box 1" [ref=e12] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e13]
+          - text: Litter Box
+          - generic: "1"
+        - button "Log Out" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img "Cat litter box" [ref=e20]
+        - generic [ref=e21]:
+          - heading "The Litter Box" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Deleted events rest here. Clean the litter box to remove them for good.
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: Independence Day
+          - generic [ref=e28]: 📅 Jul 4, 2026
+        - generic [ref=e29]:
+          - generic [ref=e30]: Shredded Jun 26 at 01:45 PM
+          - button "Save it — restore this event" [ref=e31] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e38]: Save it!
+      - button "Clean Litter Box" [active] [ref=e40] [cursor=pointer]:
+        - img [ref=e41]
+        - text: Clean Litter Box
+    - generic [ref=e45]:
+      - img "Cat litter box" [ref=e46]
+      - heading "Clean the litter box?" [level=2] [ref=e47]
+      - paragraph [ref=e48]: This permanently removes all 1 shredded event.
+      - generic [ref=e49]:
+        - button "Yes, clean it!" [ref=e50] [cursor=pointer]:
+          - img [ref=e51]
+          - text: Yes, clean it!
+        - button "Not yet" [ref=e54] [cursor=pointer]

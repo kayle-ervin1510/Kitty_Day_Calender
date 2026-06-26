@@ -1011,6 +1011,10 @@
   border-radius: var(--radius-md);
   mix-blend-mode: multiply;
 }
+[data-theme="dark"] .cal-holiday-img,
+[data-theme="meow-mixer"] .cal-holiday-img,
+[data-theme="rainbow"] .cal-holiday-img,
+[data-theme="year-of-cat"] .cal-holiday-img { mix-blend-mode: normal; }
 
 .cal-day-event-row {
   display: flex;

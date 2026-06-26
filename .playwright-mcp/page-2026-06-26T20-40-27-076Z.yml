@@ -1,0 +1,24 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Profile Kitty Day Calendar" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e7]
+        - text: Kitty Day Calendar
+      - generic [ref=e8]:
+        - link "Calendar" [ref=e9] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e10] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box" [ref=e12] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e13]
+          - text: Litter Box
+        - button "Log Out" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - paragraph [ref=e74]: 🐾
+      - heading "Event saved!" [level=2] [ref=e75]
+      - paragraph [ref=e76]: Taking you back to your calendar…
