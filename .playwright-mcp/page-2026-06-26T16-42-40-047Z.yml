@@ -1,0 +1,26 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]: 🐱
+    - heading "Kitty Day Calendar" [level=1] [ref=e6]
+    - paragraph [ref=e7]: To log in, enter your username or email and password. New here? Please sign up!
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - button "Sign In" [ref=e10] [cursor=pointer]
+      - button "Sign Up" [ref=e11] [cursor=pointer]
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e48]: Username or Email
+        - textbox "Username or Email" [active] [ref=e49]:
+          - /placeholder: Enter your username or email
+          - text: animeprettygirl16@gmail.com
+      - generic [ref=e16]:
+        - generic [ref=e17]: Password
+        - textbox "Password" [ref=e50]:
+          - /placeholder: Enter your password
+          - text: MEOWmeow22*
+      - paragraph [ref=e51]:
+        - button "Forgot password?" [ref=e52] [cursor=pointer]
+      - button "Sign In 🐾" [ref=e53] [cursor=pointer]
+      - paragraph [ref=e54]:
+        - text: Don't have an account?
+        - button "Sign up here" [ref=e55] [cursor=pointer]

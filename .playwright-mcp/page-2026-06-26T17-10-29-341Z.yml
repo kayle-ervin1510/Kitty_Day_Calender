@@ -1,0 +1,45 @@
+- generic [ref=e24]:
+  - navigation [ref=e25]:
+    - generic [ref=e26]:
+      - link "Profile Kitty Day Calendar" [ref=e27] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e28]
+        - text: Kitty Day Calendar
+      - generic [ref=e29]:
+        - link "Calendar" [ref=e30] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e31] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e32] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box" [ref=e33] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e34]
+          - text: Litter Box
+        - button "Sign Out" [ref=e37] [cursor=pointer]
+  - main [ref=e38]:
+    - generic [ref=e39]:
+      - generic [ref=e40]:
+        - img "Kitty Day Calendar cat" [ref=e41]
+        - heading "Welcome to Kitty Day Calendar, Kyla!" [level=1] [ref=e42]
+        - paragraph [ref=e43]: Your purr-fectly fun way to track your schedule.
+      - generic [ref=e44]:
+        - heading "About Kitty Day Calendar" [level=2] [ref=e45]
+        - paragraph [ref=e46]:
+          - text: Everyone can have a calendar app, but can everyone have a
+          - emphasis [ref=e47]: Kitty Day Calendar
+          - text: "? With Kitty Day Calendar you can manage your schedule and receive a unique cat fact every single day — plus an assortment of cute kitty images to keep things fun!"
+        - paragraph [ref=e48]:
+          - text: Mark a day as a
+          - strong [ref=e49]: Holiday
+          - text: or a
+          - strong [ref=e50]: Birthday
+          - text: and the app will show you a special cat image for that occasion. You can also set up notifications so we remind you of upcoming events — two days before and again on the day — via email or SMS.
+        - paragraph [ref=e51]: Create events, view National and International Holidays, edit or remove anything you like, and even set up a Family Account so your whole household can stay in sync. 🐾
+        - generic [ref=e52]:
+          - button "Add Event 🗓️" [ref=e53] [cursor=pointer]
+          - button "Go to My Calendar 📅" [ref=e54] [cursor=pointer]
+          - button "Allow Permissions for Kitty Day 🔔" [ref=e55] [cursor=pointer]
+        - paragraph [ref=e56]:
+          - text: Questions?
+          - button "Contact Us" [ref=e57] [cursor=pointer]

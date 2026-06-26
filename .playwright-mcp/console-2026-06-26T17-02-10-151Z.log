@@ -1,0 +1,2 @@
+[  487585ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://ntazfxyuwzqoavsfvdmm.supabase.co/auth/v1/logout?scope=global:0
+[  487692ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://kitty-day-calender.vercel.app/login:0
