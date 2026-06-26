@@ -1,0 +1,44 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]: 🐱
+    - heading "Kitty Day Calendar" [level=1] [ref=e6]
+    - paragraph [ref=e7]: Create your account and start tracking your schedule with daily cat facts!
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - button "Sign In" [ref=e10] [cursor=pointer]
+      - button "Sign Up" [ref=e11] [cursor=pointer]
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e24]:
+          - generic [ref=e25]: Full Name
+          - textbox "Full Name" [active] [ref=e26]:
+            - /placeholder: Your full name
+        - generic [ref=e27]:
+          - generic [ref=e28]: Preferred Name
+          - textbox "Preferred Name" [ref=e29]:
+            - /placeholder: e.g. Kitty (optional)
+      - generic [ref=e16]:
+        - generic [ref=e17]: Username
+        - textbox "Username" [ref=e30]:
+          - /placeholder: Choose a username
+      - generic [ref=e31]:
+        - generic [ref=e32]: Email
+        - textbox "Email" [ref=e33]:
+          - /placeholder: your@email.com
+      - generic [ref=e34]:
+        - generic [ref=e35]: Confirm Email
+        - textbox "Confirm Email" [ref=e36]:
+          - /placeholder: Re-enter your email
+      - generic [ref=e37]:
+        - generic [ref=e38]: Password
+        - textbox "Password" [ref=e39]:
+          - /placeholder: At least 6 characters
+      - generic [ref=e40]:
+        - generic [ref=e41]: Confirm Password
+        - textbox "Confirm Password" [ref=e42]:
+          - /placeholder: Re-enter your password
+      - paragraph [ref=e44]: No account found — create one below!
+      - button "Create Account 🐱" [ref=e45] [cursor=pointer]
+      - paragraph [ref=e46]:
+        - text: Already have an account?
+        - button "Sign in here" [ref=e47] [cursor=pointer]

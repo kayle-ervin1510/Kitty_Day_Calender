@@ -250,14 +250,6 @@ export function AppProvider({ children }) {
 
       if (!resolvedEmail) return { success: false, error: 'No account found with that username.', notFound: true }
       email = resolvedEmail
-    } else {
-      // Check if any account exists with this email before attempting sign-in
-      const { data: exists } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle()
-      if (!exists) return { success: false, error: 'No account found with that email.', notFound: true }
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
