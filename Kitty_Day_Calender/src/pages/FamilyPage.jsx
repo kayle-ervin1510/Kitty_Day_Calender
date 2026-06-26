@@ -38,6 +38,22 @@ export default function FamilyPage() {
     e.preventDefault()
     if (!newName.trim()) { setAddError('Name is required.'); return }
 
+    const emailTrimmed = newEmail.trim().toLowerCase()
+
+    if (emailTrimmed) {
+      if (emailTrimmed === user.email.toLowerCase()) {
+        setAddError("You can't add yourself as a family member.")
+        return
+      }
+      const duplicate = familyMembers.some(
+        m => m.email && m.email.toLowerCase() === emailTrimmed
+      )
+      if (duplicate) {
+        setAddError('A family member with that email has already been added.')
+        return
+      }
+    }
+
     const result = await addFamilyMember({
       name:  newName.trim(),
       email: newEmail.trim() || null,
@@ -46,8 +62,21 @@ export default function FamilyPage() {
 
     if (!result.success) { setAddError(result.error); setAddErrorStatus(result.status ?? null); return }
 
+    const addedName = newName.trim()
+    const addedEmail = newEmail.trim()
     resetAdd()
-    flash(`${newName.trim()} has been added to your family! 🐾`)
+    flash(`${addedName} has been added to your family! 🐾`)
+
+    if (addedEmail && result.member?.id) {
+      const inviteResult = await generateInvite(result.member.id, addedEmail)
+      if (inviteResult.success && inviteResult.url) {
+        const subject = encodeURIComponent('You have been invited to Kitty Day Calendar!')
+        const body = encodeURIComponent(
+          `Hi ${addedName},\n\n${user.preferredName ?? user.name} has invited you to join their Kitty Day Calendar family account.\n\nClick the link below to accept:\n${inviteResult.url}\n\nSee you there! 🐾`
+        )
+        window.open(`mailto:${addedEmail}?subject=${subject}&body=${body}`, '_blank')
+      }
+    }
   }
 
   async function handleConfirmRemove(id) {
