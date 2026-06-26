@@ -64,19 +64,21 @@ test('2 — create, edit, and delete an event', async ({ page }) => {
   await page.locator('button', { hasText: 'Regular event' }).click()
   await page.locator('button', { hasText: 'Create Event!' }).click()
 
-  // AddEventPage shows the success screen immediately (addEvent is fire-and-forget)
+  // AddEventPage now awaits addEvent before showing the success screen
   await expect(page.locator('.event-saved-screen')).toBeVisible({ timeout: 10000 })
 
-  // Wait for auto-navigation + pill to appear, confirming the Supabase insert completed
+  // Wait for auto-navigation to /calendar
   await expect(page).toHaveURL('/calendar', { timeout: 10000 })
-  await expect(page.locator(`.cal-pill[title="${EVENT_NAME}"]`).first()).toBeVisible({ timeout: 10000 })
+
+  // The month view only renders the first 2 pills per cell — when prior test
+  // runs have left >2 events on today's date, the new pill is hidden behind "+N".
+  // Switch to Day view to see ALL events without the 2-pill limit.
+  await page.getByRole('button', { name: 'Day', exact: true }).click()
+  const createdRow = page.locator('.cal-day-event-row', { hasText: EVENT_NAME }).first()
+  await createdRow.waitFor({ timeout: 10000 })
 
   // ── Edit ────────────────────────────────────────────────────────────────────
-  await page.locator(`.cal-pill[title="${EVENT_NAME}"]`).first().click()
-
-  const editBtn = page.locator('.cal-day-event-row', { hasText: EVENT_NAME })
-    .locator('button', { hasText: 'Edit Event' }).first()
-  await editBtn.waitFor({ timeout: 10000 })
+  const editBtn = createdRow.locator('button', { hasText: 'Edit Event' })
   await editBtn.click()
 
   await expect(page).toHaveURL(/\/events\/.*\/edit/, { timeout: 10000 })
@@ -84,29 +86,31 @@ test('2 — create, edit, and delete an event', async ({ page }) => {
   await page.locator('#ev-name').fill(EVENT_EDITED)
   await page.locator('button', { hasText: 'Save Changes' }).click()
 
-  // EditEventPage navigates directly to /calendar on save (no success screen).
-  // Wait for the renamed pill — confirms the Supabase update completed.
+  // EditEventPage navigates directly to /calendar on save (no success screen)
   await expect(page).toHaveURL('/calendar', { timeout: 10000 })
-  await expect(page.locator(`.cal-pill[title="${EVENT_EDITED}"]`).first()).toBeVisible({ timeout: 10000 })
+
+  // Back to Day view to confirm the rename and find the event for deletion
+  await page.getByRole('button', { name: 'Day', exact: true }).click()
+  const editedRow = page.locator('.cal-day-event-row', { hasText: EVENT_EDITED }).first()
+  await editedRow.waitFor({ timeout: 10000 })
 
   // ── Delete ───────────────────────────────────────────────────────────────────
-  await page.locator(`.cal-pill[title="${EVENT_EDITED}"]`).first().click()
-
-  const deleteEditBtn = page.locator('.cal-day-event-row', { hasText: EVENT_EDITED })
-    .locator('button', { hasText: 'Edit Event' }).first()
-  await deleteEditBtn.waitFor({ timeout: 10000 })
+  const deleteEditBtn = editedRow.locator('button', { hasText: 'Edit Event' })
   await deleteEditBtn.click()
 
   await expect(page).toHaveURL(/\/events\/.*\/edit/, { timeout: 10000 })
   await page.locator('button', { hasText: 'Delete Event' }).click()
   await page.locator('.logout-modal button', { hasText: 'Yes, delete it' }).click()
 
-  // EditEventPage shows a success/goodbye screen then navigates to /calendar
+  // EditEventPage shows a goodbye screen then auto-navigates to /calendar
   await expect(page.locator('.event-saved-screen')).toBeVisible({ timeout: 10000 })
   await expect(page).toHaveURL('/calendar', { timeout: 10000 })
 
-  // Confirm the pill is gone
-  await expect(page.locator(`.cal-pill[title="${EVENT_EDITED}"]`)).not.toBeVisible({ timeout: 5000 })
+  // Confirm the event is gone from Day view
+  await page.getByRole('button', { name: 'Day', exact: true }).click()
+  await expect(
+    page.locator('.cal-day-event-row', { hasText: EVENT_EDITED })
+  ).not.toBeVisible({ timeout: 5000 })
 })
 
 // ─── 3. Logout ───────────────────────────────────────────────────────────────
