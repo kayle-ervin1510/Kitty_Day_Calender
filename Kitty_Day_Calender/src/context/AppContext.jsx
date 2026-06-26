@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import axios from 'axios'
 import { supabase } from '../lib/supabase'
 import { isCurrentlyYearOfCat } from '../lib/yearOfCat'
 
@@ -557,8 +558,7 @@ export function AppProvider({ children }) {
     }
 
     try {
-      const res  = await fetch('https://cat-fact.herokuapp.com/facts/random?animal_type=cat')
-      const data = await res.json()
+      const { data } = await axios.get('https://cat-fact.herokuapp.com/facts/random?animal_type=cat')
       return persist(data?.text || CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)])
     } catch {
       return persist(CAT_FACTS_FALLBACK[Math.floor(Math.random() * CAT_FACTS_FALLBACK.length)])
