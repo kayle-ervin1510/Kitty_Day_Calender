@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useApp } from '../context/AppContext'
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate()
+  const { changePassword } = useApp()
   const [newPassword, setNewPassword]     = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError]   = useState('')
@@ -22,9 +23,9 @@ export default function ResetPasswordPage() {
       return
     }
 
-    const { error: err } = await supabase.auth.updateUser({ password: newPassword })
-    if (err) {
-      setError(err.message)
+    const result = await changePassword(newPassword)
+    if (!result.success) {
+      setError(result.error)
       return
     }
 
