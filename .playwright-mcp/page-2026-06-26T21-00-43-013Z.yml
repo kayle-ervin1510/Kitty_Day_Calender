@@ -1,0 +1,79 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Profile Kitty Day Calendar" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e7]
+        - text: Kitty Day Calendar
+      - generic [ref=e8]:
+        - link "Calendar" [ref=e9] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e10] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box 1" [ref=e12] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e13]
+          - text: Litter Box
+          - generic: "1"
+        - button "Log Out" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - heading "Welcome to Kyla's Calendar!" [level=1] [ref=e21]
+          - paragraph [ref=e22]: What's on the agenda for today?
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]: 🐱
+            - generic [ref=e27]: June 26, 2026
+          - img "Cat clock — click to show seconds" [ref=e28] [cursor=pointer]:
+            - generic [ref=e51]: "12"
+            - generic [ref=e52]: "3"
+            - generic [ref=e53]: "6"
+            - generic [ref=e54]: "9"
+            - generic [ref=e59]: 02:00 PM
+      - generic [ref=e60]:
+        - button "Add Event 🗓️" [ref=e61] [cursor=pointer]
+        - button "✓ Showing Family Events" [ref=e62] [cursor=pointer]:
+          - text: ✓ Showing Family Events
+          - img [ref=e63]
+        - button "Give me a Cat Fact! 🐈" [ref=e69] [cursor=pointer]
+      - generic [ref=e70]:
+        - button "Toggle Federal Holidays" [ref=e71] [cursor=pointer]:
+          - generic [ref=e72]: 🇺🇸
+          - generic: Hide Federal Holidays
+        - button "Toggle International Holidays" [ref=e73] [cursor=pointer]:
+          - generic [ref=e74]: 🌍
+          - generic: Apply International Holidays
+        - button "Toggle Cat Holidays" [ref=e75] [cursor=pointer]:
+          - generic [ref=e76]: 😻
+          - generic: Apply Cat Holidays
+        - button "Toggle US Popular Holidays" [ref=e77] [cursor=pointer]:
+          - generic [ref=e78]: 🧶
+          - generic: Apply US Popular Holidays
+      - generic [ref=e79]:
+        - generic [ref=e80]:
+          - button "Month" [ref=e81] [cursor=pointer]
+          - button "Week" [ref=e82] [cursor=pointer]
+          - button "Day" [ref=e83] [cursor=pointer]
+        - generic [ref=e84]:
+          - button "‹" [ref=e85] [cursor=pointer]
+          - generic [ref=e86]: Fri, June 19, 2026
+          - button "›" [ref=e87] [cursor=pointer]
+          - button "Today" [ref=e88] [cursor=pointer]
+      - generic [ref=e161]:
+        - generic [ref=e162]:
+          - generic [ref=e163]: Fri, June 19, 2026
+          - generic [ref=e164]: Past
+        - generic [ref=e165]:
+          - paragraph [ref=e166]: Holidays
+          - generic [ref=e167]:
+            - generic [ref=e168]:
+              - generic [ref=e169]: 🇺🇸
+              - generic [ref=e170]: Juneteenth
+            - img "Juneteenth" [ref=e172]
+        - generic [ref=e173]:
+          - paragraph [ref=e174]: No events on this day.
+          - button "Add Event 🗓️" [ref=e175] [cursor=pointer]

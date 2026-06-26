@@ -17,9 +17,14 @@ function randomWildCat() {
 
 function buildFact(animal, name) {
   const c = animal?.characteristics || {}
+  if (c.fun_fact)                 return `Fun fact: ${c.fun_fact}`
   if (c.slogan)                   return `${name}: "${c.slogan}"`
   if (c.top_speed)                return `${name}s can reach speeds of ${c.top_speed}!`
   if (c.most_distinctive_feature) return `${name}s are known for: ${c.most_distinctive_feature}.`
+  if (c.prey)                     return `${name}s prey on: ${c.prey}.`
+  if (c.diet)                     return `${name}s are ${c.diet}.`
+  if (c.lifespan)                 return `${name}s live up to ${c.lifespan} in the wild.`
+  if (c.lifestyle)                return `${name}s are ${c.lifestyle}.`
   if (c.biggest_threat)           return `The biggest threat to the ${name}: ${c.biggest_threat}.`
   if (c.habitat)                  return `${name}s are found in: ${c.habitat}.`
   return `${name}s are magnificent wild cats.`

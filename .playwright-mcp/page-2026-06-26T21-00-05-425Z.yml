@@ -1,0 +1,71 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Profile Kitty Day Calendar" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - img "Profile" [ref=e7]
+        - text: Kitty Day Calendar
+      - generic [ref=e8]:
+        - link "Calendar" [ref=e9] [cursor=pointer]:
+          - /url: /calendar
+        - link "My Profile" [ref=e10] [cursor=pointer]:
+          - /url: /profile
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Litter Box 1" [ref=e12] [cursor=pointer]:
+          - /url: /litter-box
+          - img [ref=e13]
+          - text: Litter Box
+          - generic: "1"
+        - button "Log Out" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img "Profile" [ref=e20]
+        - generic [ref=e21]:
+          - heading "Kyla" [level=1] [ref=e22]
+          - paragraph [ref=e23]: "@Kitty_Chicken"
+      - generic [ref=e24]:
+        - button "Profile" [ref=e25] [cursor=pointer]
+        - button "Preferences" [active] [ref=e26] [cursor=pointer]
+        - button "My Events (1)" [ref=e27] [cursor=pointer]
+        - button "Security" [ref=e28] [cursor=pointer]
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - generic [ref=e73]: Calendar Theme
+          - generic [ref=e74]:
+            - button "Light Mode Soft pastels — warm creams, sage green, and gentle mauve. The default." [ref=e75] [cursor=pointer]:
+              - generic [ref=e81]: Light Mode
+              - generic [ref=e82]: Soft pastels — warm creams, sage green, and gentle mauve. The default.
+            - button "Dark Mode Deep, cozy backgrounds with pastel accents for dates and text." [ref=e83] [cursor=pointer]:
+              - generic [ref=e89]: Dark Mode
+              - generic [ref=e90]: Deep, cozy backgrounds with pastel accents for dates and text.
+            - button "Yarnbow Swirl Bright, playful colors — bold purples, electric teals, and vivid pinks. ✓" [ref=e91] [cursor=pointer]:
+              - generic [ref=e97]: Yarnbow Swirl
+              - generic [ref=e98]: Bright, playful colors — bold purples, electric teals, and vivid pinks.
+              - generic [ref=e99]: ✓
+            - button "Ode to Catnip Olive greens, sea green, pastel yellow, and pale gray — fresh and herbaceous." [ref=e100] [cursor=pointer]:
+              - generic [ref=e106]: Ode to Catnip
+              - generic [ref=e107]: Olive greens, sea green, pastel yellow, and pale gray — fresh and herbaceous.
+            - button "Meow Mixer Rich orange, dark green, tanned brown, and deep earthy tones." [ref=e108] [cursor=pointer]:
+              - generic [ref=e114]: Meow Mixer
+              - generic [ref=e115]: Rich orange, dark green, tanned brown, and deep earthy tones.
+            - button "Mewture Style Muted natural tones — soft earth, cat-fur warm beige, and quiet greens." [ref=e116] [cursor=pointer]:
+              - generic [ref=e122]: Mewture Style
+              - generic [ref=e123]: Muted natural tones — soft earth, cat-fur warm beige, and quiet greens.
+        - separator [ref=e124]
+        - generic [ref=e126] [cursor=pointer]:
+          - generic [ref=e127]: Allow Notifications
+          - switch "Allow Notifications" [checked] [ref=e128]
+        - generic [ref=e129]:
+          - generic [ref=e130]: Notification Method
+          - generic [ref=e131]:
+            - button "📧 Email" [ref=e132] [cursor=pointer]:
+              - generic [ref=e133]: 📧
+              - generic [ref=e134]: Email
+            - button "📱 SMS" [ref=e135] [cursor=pointer]:
+              - generic [ref=e136]: 📱
+              - generic [ref=e137]: SMS
+        - button "Save Preferences" [ref=e139] [cursor=pointer]:
+          - text: Save Preferences
+          - img [ref=e140]
