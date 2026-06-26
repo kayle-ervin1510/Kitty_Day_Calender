@@ -50,9 +50,6 @@ export default function LoginPage() {
       const redirect = sessionStorage.getItem('kitty_join_redirect')
       if (redirect) { sessionStorage.removeItem('kitty_join_redirect'); window.location.href = redirect; return }
       navigate('/home')
-    } else if (result.notFound) {
-      switchTab('signup')
-      setError('No account found — create one below!')
     } else {
       setError(result.error)
       setErrorStatus(result.status ?? null)
