@@ -24,13 +24,13 @@ Project_2/
 │   │   ├── lib/yearOfCat.js    # Vietnamese zodiac Year of the Cat date ranges
 │   │   ├── components/         # Navbar.jsx, KittyClock.jsx, HttpCatImage.jsx, CatImagePicker.jsx
 │   │   └── pages/              # One file per route (see Routing section)
-│   ├── tests/                  # Playwright E2E tests (auth-callback.spec.js)
+│   ├── tests/                  # Playwright E2E tests (4 suites)
 │   └── package.json
 ├── supabase/                   # Supabase CLI project (linked to remote)
 │   ├── reference/              # ERD screenshot, original schema, UX decisions
 │   └── supabase/               # CLI root — run all `npx supabase` commands from here
 │       ├── config.toml
-│       └── migrations/         # 20 applied migrations
+│       └── migrations/         # 22 applied migrations
 └── Main/supabase/              # Empty placeholder — backend lives in supabase/ above
 ```
 
@@ -163,7 +163,7 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 | Table | Key columns |
 |---|---|
 | `user_profiles` | `id`, `auth_id` (FK to `auth.users`), `username`, `name`, `preferred_name`, `email`, `phone_number`, `profile_pic`, `timezone`, `notifications_enabled`, `notification_method`, `is_family_account`, `theme`, `daily_cat_fact`, `calendar_prefs` (JSONB), `created_at` |
-| `user_events` | `id`, `user_id` (FK to `user_profiles`), `name`, `date`, `start_time`, `end_time`, `event_type`, `notify_options`, `family_visible`, `note`, `image_url`, `deleted_at`, `created_at` |
+| `user_events` | `id`, `user_id` (FK to `user_profiles`), `name`, `date`, `start_time`, `end_time`, `event_type`, `notify_options`, `family_visible`, `note`, `image_url`, `image_caption`, `deleted_at`, `created_at` |
 | `family_accounts` | `id`, `owner_id` (FK to `user_profiles`) |
 | `family_members` | `id`, `family_account_id`, `name`, `email`, `phone`, `notifications_enabled`, `linked_user_id` (FK → `user_profiles`, set when an invite is accepted), `created_at` |
 | `family_invites` | `id`, `family_account_id`, `family_member_id`, `invited_email`, `token` (uuid, unique), `accepted_at`, `created_at` |
@@ -198,7 +198,7 @@ Three views (`month`, `week`, `day`) with prev/next navigation; clicking a month
 
 ## Event data shape
 
-`{ id, userId, createdAt, name, date (YYYY-MM-DD), startTime, endTime, eventType ('holiday'|'birthday'|'other'), notifyOptions, familyVisible, note, imageUrl, deletedAt }`
+`{ id, userId, createdAt, name, date (YYYY-MM-DD), startTime, endTime, eventType ('holiday'|'birthday'|'other'), notifyOptions, familyVisible, note, imageUrl, imageCaption, deletedAt }`
 
 ## Styling
 
@@ -245,7 +245,7 @@ npx supabase db push                # push local migrations to remote
 npx supabase db pull                # pull remote schema → baseline migration
 ```
 
-Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17.6). 20 migrations applied.
+Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17.6). 22 migrations applied.
 
 ## Schema reference
 
