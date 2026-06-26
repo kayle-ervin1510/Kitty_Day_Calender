@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useLocation } from 'react-router-dom'
-import HttpCatImage from '../components/HttpCatImage'
-import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
+import FormError from '../components/FormError'
 
 const CAT_PICS = ['🐱','😸','😺','😻','🙀','😼','😽','🐈','🐈‍⬛','🦁','🐯','🐅']
 const isUrl = str => typeof str === 'string' && str.startsWith('http')
@@ -464,14 +463,7 @@ export default function ProfilePage() {
             />
           </div>
 
-          {securityError && (
-            <div className="form-error-block">
-              {securityErrorStatus && HTTP_CAT_SUPPORTED.has(securityErrorStatus) && (
-                <HttpCatImage status={securityErrorStatus} className="form-http-cat" />
-              )}
-              <p className="form-error">{securityError}</p>
-            </div>
-          )}
+          <FormError message={securityError} status={securityErrorStatus} />
           {securityMsg   && <p className="form-success">{securityMsg}</p>}
 
           <div className="profile-form-actions">

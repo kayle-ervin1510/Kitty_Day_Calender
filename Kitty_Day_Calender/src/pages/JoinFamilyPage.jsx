@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
-import HttpCatImage from '../components/HttpCatImage'
-import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
+import FormError from '../components/FormError'
 
 export default function JoinFamilyPage() {
   const [searchParams] = useSearchParams()
@@ -175,14 +174,7 @@ export default function JoinFamilyPage() {
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '0.5rem' }}>
           Accepting lets you see their shared events in your calendar.
         </p>
-        {error && (
-          <div className="form-error-block">
-            {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
-              <HttpCatImage status={errorStatus} className="form-http-cat" />
-            )}
-            <p className="form-error" style={{ textAlign: 'center' }}>{error}</p>
-          </div>
-        )}
+        <FormError message={error} status={errorStatus} centered />
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
           <button className="btn btn-primary" onClick={handleAccept} disabled={joining}>
             {joining ? 'Joining…' : 'Accept Invite 🐾'}

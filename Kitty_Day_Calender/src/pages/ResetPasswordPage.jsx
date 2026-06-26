@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import HttpCatImage from '../components/HttpCatImage'
-import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
+import FormError from '../components/FormError'
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -77,14 +76,7 @@ export default function ResetPasswordPage() {
                 required
               />
             </div>
-            {error && (
-              <div className="form-error-block">
-                {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
-                  <HttpCatImage status={errorStatus} className="form-http-cat" />
-                )}
-                <p className="form-error">{error}</p>
-              </div>
-            )}
+            <FormError message={error} status={errorStatus} />
             <button type="submit" className="btn btn-primary btn-full btn-lg">
               Update Password 🐾
             </button>

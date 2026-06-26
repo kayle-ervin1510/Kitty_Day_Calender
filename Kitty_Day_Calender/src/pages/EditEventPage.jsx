@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext'
 import oopsCat from '../assets/oops-cat.png'
 import CatImagePicker from '../components/CatImagePicker'
 import HttpCatImage from '../components/HttpCatImage'
-import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
+import FormError from '../components/FormError'
 
 function LitterBox() {
   return (
@@ -360,14 +360,7 @@ export default function EditEventPage() {
             </label>
           </div>
 
-          {error && (
-            <div className="form-error-block">
-              {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
-                <HttpCatImage status={errorStatus} className="form-http-cat" />
-              )}
-              <p className="form-error">{error}</p>
-            </div>
-          )}
+          <FormError message={error} status={errorStatus} />
 
           <div className="event-form-actions">
             <button type="submit" className="btn btn-primary btn-lg">

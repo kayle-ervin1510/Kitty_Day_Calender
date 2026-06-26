@@ -312,12 +312,12 @@ export function AppProvider({ children }) {
         family_visible: eventData.familyVisible || false,
         note:           eventData.note         || null,
         image_url:      eventData.imageUrl     || null,
-        image_caption:  eventData.imageCaption || null,
+        image_caption:  eventData.imageCaption ?? null,
       })
       .select()
       .single()
 
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? null }
     const normalized = normalizeEvent(data)
     setEvents(prev => [...prev, normalized])
     return { success: true, event: normalized }
@@ -343,7 +343,7 @@ export function AppProvider({ children }) {
       .select()
       .single()
 
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? null }
     const normalized = normalizeEvent(data)
     setEvents(prev => prev.map(e => e.id === id ? normalized : e))
     return { success: true }
@@ -428,7 +428,7 @@ export function AppProvider({ children }) {
       .select()
       .single()
 
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? null }
     const normalized = normalizeMember(data)
     setFamilyMembers(prev => [...prev, normalized])
     return { success: true, member: normalized }
@@ -474,7 +474,7 @@ export function AppProvider({ children }) {
 
   async function acceptInvite(token) {
     const { data, error } = await supabase.rpc('accept_family_invite', { p_token: token })
-    if (error) return { success: false, error: error.message }
+    if (error) return { success: false, error: error.message, status: error.status ?? null }
     if (!data.success) return { success: false, error: data.error }
 
     // Refresh shared events now that the link is established

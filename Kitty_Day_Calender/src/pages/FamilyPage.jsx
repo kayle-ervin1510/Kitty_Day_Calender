@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import HttpCatImage from '../components/HttpCatImage'
-import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
+import FormError from '../components/FormError'
 
 export default function FamilyPage() {
   const { user, familyMembers, updateProfile, addFamilyMember, removeFamilyMember, refreshFamilyMembers, generateInvite } = useApp()
@@ -41,7 +40,7 @@ export default function FamilyPage() {
     const emailTrimmed = newEmail.trim().toLowerCase()
 
     if (emailTrimmed) {
-      if (emailTrimmed === user.email.toLowerCase()) {
+      if (emailTrimmed === (user.email ?? '').toLowerCase()) {
         setAddError("You can't add yourself as a family member.")
         return
       }
@@ -74,7 +73,7 @@ export default function FamilyPage() {
         const body = encodeURIComponent(
           `Hi ${addedName},\n\n${user.preferredName ?? user.name} has invited you to join their Kitty Day Calendar family account.\n\nClick the link below to accept:\n${inviteResult.url}\n\nSee you there! 🐾`
         )
-        window.open(`mailto:${addedEmail}?subject=${subject}&body=${body}`, '_blank')
+        window.location.href = `mailto:${addedEmail}?subject=${subject}&body=${body}`
       }
     }
   }
@@ -251,14 +250,7 @@ export default function FamilyPage() {
                   </div>
                 </div>
 
-                {addError && (
-                  <div className="form-error-block">
-                    {addErrorStatus && HTTP_CAT_SUPPORTED.has(addErrorStatus) && (
-                      <HttpCatImage status={addErrorStatus} className="form-http-cat" />
-                    )}
-                    <p className="form-error">{addError}</p>
-                  </div>
-                )}
+                <FormError message={addError} status={addErrorStatus} />
 
                 <div className="family-add-actions">
                   <button type="submit" className="btn btn-primary">Add to Family 🐾</button>

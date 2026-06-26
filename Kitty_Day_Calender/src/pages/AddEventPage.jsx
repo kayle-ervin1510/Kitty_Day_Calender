@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import CatImagePicker from '../components/CatImagePicker'
-import HttpCatImage from '../components/HttpCatImage'
-import { HTTP_CAT_SUPPORTED } from '../lib/httpCat'
+import FormError from '../components/FormError'
 
 const NOTIFY_OPTIONS = [
   { value: '15min',  label: '15 minutes before' },
@@ -299,14 +298,7 @@ export default function AddEventPage() {
           </label>
         </div>
 
-        {error && (
-          <div className="form-error-block">
-            {errorStatus && HTTP_CAT_SUPPORTED.has(errorStatus) && (
-              <HttpCatImage status={errorStatus} className="form-http-cat" />
-            )}
-            <p className="form-error">{error}</p>
-          </div>
-        )}
+        <FormError message={error} status={errorStatus} />
 
         <div className="event-form-actions">
           <button type="submit" className="btn btn-primary btn-lg">
