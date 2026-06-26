@@ -90,13 +90,13 @@ export default function EditEventPage() {
     )
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     if (!name.trim()) { setError('Please give your event a name.'); return }
     if (!date)        { setError('Please pick a date for your event.'); return }
     setError('')
 
-    updateEvent(id, {
+    const result = await updateEvent(id, {
       name: name.trim(),
       date,
       startTime: startTime || null,
@@ -113,6 +113,8 @@ export default function EditEventPage() {
       imageUrl,
       familyVisible: isPublic,
     })
+
+    if (!result?.success) { setError(result?.error || 'Failed to save event.'); return }
 
     navigate('/calendar')
   }

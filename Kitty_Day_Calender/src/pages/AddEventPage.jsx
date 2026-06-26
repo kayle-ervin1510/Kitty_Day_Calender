@@ -42,13 +42,13 @@ export default function AddEventPage() {
     )
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     if (!name.trim()) { setError('Please give your event a name.'); return }
     if (!date)        { setError('Please pick a date for your event.'); return }
     setError('')
 
-    addEvent({
+    const result = await addEvent({
       name:      name.trim(),
       date,
       startTime: startTime || null,
@@ -65,6 +65,8 @@ export default function AddEventPage() {
       imageUrl,
       familyVisible: isPublic,
     })
+
+    if (!result.success) { setError(result.error || 'Failed to save event.'); return }
 
     setSaved(true)
     setTimeout(() => navigate('/calendar'), 1800)
