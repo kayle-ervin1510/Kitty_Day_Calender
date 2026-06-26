@@ -22,7 +22,7 @@ Project_2/
 │   │   ├── lib/supabase.js     # Supabase client (reads VITE_SUPABASE_* env vars)
 │   │   ├── lib/httpCat.js      # HTTP status code map + set of codes http.cat supports
 │   │   ├── lib/yearOfCat.js    # Vietnamese zodiac Year of the Cat date ranges
-│   │   ├── components/         # Navbar.jsx, KittyClock.jsx, HttpCatImage.jsx, CatImagePicker.jsx
+│   │   ├── components/         # Navbar.jsx, KittyClock.jsx, HttpCatImage.jsx, CatImagePicker.jsx, FormError.jsx
 │   │   └── pages/              # One file per route (see Routing section)
 │   ├── tests/                  # Playwright E2E tests (4 suites)
 │   └── package.json
@@ -156,6 +156,8 @@ Single `AppContext`; `useApp()` is the only access point. All Supabase calls liv
 | `generateInvite(memberId, email)` | Creates (or reuses a pending) `family_invites` row and returns `{ success, url? }` — the URL contains the one-time `token` query param |
 | `acceptInvite(token)` | Calls `accept_family_invite(p_token)` RPC, links `family_members.linked_user_id` to the current user, refreshes `sharedEvents`; returns `{ success, error? }` |
 
+**Error return shape:** All async mutations return `{ success: bool, error?: string, status?: number }`. `status` is the Supabase HTTP status code (e.g. 409, 422) — pass it to `<FormError>` to conditionally show an HTTP cat image alongside the error message.
+
 **Theme persistence:** `theme` is stored in `user_profiles.theme` and loaded on session restore. The special `year-of-cat` theme is automatically downgraded to `light` when `isCurrentlyYearOfCat()` returns false.
 
 ## Supabase tables
@@ -179,8 +181,9 @@ A DB trigger on `auth.users` INSERT creates the `user_profiles` row from auth me
 
 - **`Navbar.jsx`** — rendered by `ProtectedLayout`. Shows a Litter Box badge when `deletedEvents.length > 0`. Logout uses a three-state modal (`confirming` → `goodbye` / `staying`).
 - **`KittyClock.jsx`** — SVG cat-face clock rendered on `CalendarPage`. Props: `clockTime`, `expanded`, `onToggle`. Collapsed shows sleepy eyes + digital HH:MM; expanded shows wide eyes + seconds hand + timezone.
-- **`HttpCatImage.jsx`** — renders an `<img>` from `https://http.cat/{status}`. Falls back to 404 if the code isn't in the supported set (`httpCat.js`). Used by `LoginPage`, `EditEventPage`, and `ErrorPage`.
-- **`CatImagePicker.jsx`** — lets users attach a cat image to an event. For `holiday`/`birthday` types, fetches a wild-cat photo (Unsplash) + animal fact (API Ninjas); for `other`, fetches a domestic-cat photo (The Cat API). Used by `AddEventPage` and `EditEventPage`.
+- **`HttpCatImage.jsx`** — renders an `<img>` from `https://http.cat/{status}`. Falls back to 404 if the code isn't in the supported set (`httpCat.js`). Used directly by `LoginPage`, `EditEventPage`, and `ErrorPage`; used indirectly via `FormError` everywhere else.
+- **`CatImagePicker.jsx`** — lets users attach a cat image to an event. For `holiday`/`birthday` types, fetches a wild-cat photo (Unsplash) + animal fact (API Ninjas); for `other`, fetches a domestic-cat photo (The Cat API). `onChange(url, fact)` passes both the image URL and the animal fact string (stored as `imageCaption`). Used by `AddEventPage` and `EditEventPage`.
+- **`FormError.jsx`** — shared error block: renders `HttpCatImage` when a Supabase HTTP status code is available, then the error message. Props: `message` (string), `status` (number|null), `centered` (bool). Used by `AddEventPage`, `EditEventPage`, `FamilyPage`, `JoinFamilyPage`, `ProfilePage`, `ResetPasswordPage`.
 
 ## Lib utilities (`src/lib/`)
 
@@ -228,6 +231,8 @@ Available themes (set in `ProfilePage`, applied by `updatePrefs`):
 | `year-of-cat` | Special theme; auto-downgrades to `light` outside Vietnamese Year of the Cat dates |
 
 Shared utility classes: `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-sm`, `.btn-lg`, `.btn-full`, `.card`, `.form-group`, `.form-error`, `.badge`, `.badge-event`, `.badge-holiday`, `.badge-birthday`, `.divider`, `.page-title`, `.page-subtitle`, `.cat-fact-banner`.
+
+**`mix-blend-mode` gotcha:** Several image classes use `mix-blend-mode: multiply` by default (looks good on light/mewture backgrounds). The four dark themes (`dark`, `meow-mixer`, `rainbow`, `year-of-cat`) override this to `normal` — see the existing override blocks in `App.css` for `.cal-holiday-img`, `.oops-cat-img`, and `.scratch-confirm-img`. Any new image class that uses `multiply` must include the same four-theme override or it will render nearly black on dark themes.
 
 ## Planned features not yet implemented
 
