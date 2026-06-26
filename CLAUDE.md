@@ -250,7 +250,7 @@ npx supabase db push                # push local migrations to remote
 npx supabase db pull                # pull remote schema → baseline migration
 ```
 
-Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17.6). 22 migrations applied.
+Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-1, Postgres 17.6). 21 migrations applied.
 
 ## Schema reference
 

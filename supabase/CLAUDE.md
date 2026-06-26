@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **This file is stale.** The authoritative schema, table definitions, RPCs, and migration count are in `../CLAUDE.md` (the Project_2 root). Use that file — this one is missing `family_invites`, `get_shared_events_for_user`, `accept_family_invite`, `image_caption` on `user_events`, and 8+ migrations.
+
 ## What this is
 
 Supabase backend for **Kitty Day Calendar** — a cat-themed calendar SPA. The frontend lives at `../Kitty_Day_Calender/`.
