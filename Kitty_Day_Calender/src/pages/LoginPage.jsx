@@ -17,17 +17,20 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotMsg, setForgotMsg] = useState('')
   const [forgotError, setForgotError] = useState('')
+  const [forgotErrorStatus, setForgotErrorStatus] = useState(null)
 
   async function handleForgot(e) {
     e.preventDefault()
     setForgotMsg('')
     setForgotError('')
+    setForgotErrorStatus(null)
     const result = await resetPassword(forgotEmail.trim())
     if (result.success) {
       setForgotMsg('Check your email for a password reset link! 🐾')
       setForgotEmail('')
     } else {
       setForgotError(result.error)
+      setForgotErrorStatus(result.status ?? null)
     }
   }
 
@@ -141,8 +144,15 @@ export default function LoginPage() {
                   autoFocus
                 />
               </div>
-              {forgotError && <p className="form-error">{forgotError}</p>}
-              {forgotMsg   && <p className="form-success">{forgotMsg}</p>}
+              {forgotError && (
+                <div className="form-error-block">
+                  {forgotErrorStatus && HTTP_ERROR_CODES.has(forgotErrorStatus) && (
+                    <HttpCatImage status={forgotErrorStatus} className="form-http-cat" />
+                  )}
+                  <p className="form-error">{forgotError}</p>
+                </div>
+              )}
+              {forgotMsg && <p className="form-success">{forgotMsg}</p>}
               <button type="submit" className="btn btn-secondary btn-full">
                 Send Reset Link 📧
               </button>
@@ -150,7 +160,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   className="link-btn"
-                  onClick={() => { setShowForgot(false); setForgotMsg(''); setForgotError('') }}
+                  onClick={() => { setShowForgot(false); setForgotMsg(''); setForgotError(''); setForgotErrorStatus(null) }}
                 >
                   Back to sign in
                 </button>
