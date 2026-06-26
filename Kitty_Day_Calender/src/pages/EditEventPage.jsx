@@ -78,7 +78,8 @@ export default function EditEventPage() {
   const [customDate,   setCustomDate]   = useState(event?.customNotify?.date   ?? '')
   const [customTime,   setCustomTime]   = useState(event?.customNotify?.time   ?? '')
   const [eventType,  setEventType]  = useState(event?.eventType  ?? 'other')
-  const [imageUrl,   setImageUrl]   = useState(event?.imageUrl   ?? null)
+  const [imageUrl,      setImageUrl]      = useState(event?.imageUrl      ?? null)
+  const [imageCaption,  setImageCaption]  = useState(event?.imageCaption  ?? '')
   const [isPublic,   setIsPublic]   = useState(event?.familyVisible ?? false)
   const [error,       setError]       = useState('')
   const [errorStatus, setErrorStatus] = useState(null)
@@ -114,6 +115,7 @@ export default function EditEventPage() {
       } : null,
       eventType,
       imageUrl,
+      imageCaption,
       familyVisible: isPublic,
     })
 
@@ -339,7 +341,7 @@ export default function EditEventPage() {
             <CatImagePicker
               eventType={eventType}
               value={imageUrl}
-              onChange={setImageUrl}
+              onChange={(url, fact) => { setImageUrl(url); setImageCaption(fact || '') }}
             />
           </div>
 

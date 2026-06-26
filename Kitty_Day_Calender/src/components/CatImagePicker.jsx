@@ -96,7 +96,7 @@ export default function CatImagePicker({ eventType, value, onChange }) {
 
   function handleSelect() {
     setSelected(true)
-    onChange(imageUrl)
+    onChange(imageUrl, wildFact)
   }
 
   function handleClear() {
@@ -104,7 +104,7 @@ export default function CatImagePicker({ eventType, value, onChange }) {
     setImageUrl(null)
     setWildFact('')
     setWildName('')
-    onChange(null)
+    onChange(null, '')
   }
 
   const btnLabel = isWild ? 'Find me a Wild Cat 🐆' : 'Find me a Feline 🐾'

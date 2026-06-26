@@ -820,11 +820,16 @@ export default function CalendarPage() {
                     <span className={`badge badge-${e.eventType}`}>{e.eventType}</span>
                   )}
                   {e.imageUrl && (
-                    <img
-                      src={e.imageUrl}
-                      alt={e.name}
-                      className="cal-day-event-img"
-                    />
+                    <>
+                      <img
+                        src={e.imageUrl}
+                        alt={e.name}
+                        className="cal-day-event-img"
+                      />
+                      {e.imageCaption && (
+                        <p className="cat-image-fact">🐆 {e.imageCaption}</p>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="cal-event-btns">

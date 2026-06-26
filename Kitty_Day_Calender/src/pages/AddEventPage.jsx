@@ -33,7 +33,8 @@ export default function AddEventPage() {
   const [customDate,   setCustomDate]   = useState('')
   const [customTime,   setCustomTime]   = useState('')
   const [eventType,  setEventType]  = useState('other')   // 'other' | 'holiday' | 'birthday'
-  const [imageUrl,   setImageUrl]   = useState(null)
+  const [imageUrl,      setImageUrl]      = useState(null)
+  const [imageCaption,  setImageCaption]  = useState('')
   const [isPublic,   setIsPublic]   = useState(false)
   const [error,       setError]       = useState('')
   const [errorStatus, setErrorStatus] = useState(null)
@@ -67,6 +68,7 @@ export default function AddEventPage() {
       } : null,
       eventType,
       imageUrl,
+      imageCaption,
       familyVisible: isPublic,
     })
 
@@ -277,7 +279,7 @@ export default function AddEventPage() {
           <CatImagePicker
             eventType={eventType}
             value={imageUrl}
-            onChange={setImageUrl}
+            onChange={(url, fact) => { setImageUrl(url); setImageCaption(fact || '') }}
           />
         </div>
 

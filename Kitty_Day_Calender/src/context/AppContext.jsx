@@ -50,7 +50,8 @@ function normalizeEvent(row) {
     notifyOptions: row.notify_options,
     familyVisible: row.family_visible,
     note:          row.note,
-    imageUrl:      row.image_url     ?? null,
+    imageUrl:      row.image_url      ?? null,
+    imageCaption:  row.image_caption  ?? null,
     deletedAt:     row.deleted_at,
     createdAt:     row.created_at,
   }
@@ -311,6 +312,7 @@ export function AppProvider({ children }) {
         family_visible: eventData.familyVisible || false,
         note:           eventData.note         || null,
         image_url:      eventData.imageUrl     || null,
+        image_caption:  eventData.imageCaption || null,
       })
       .select()
       .single()
@@ -332,6 +334,7 @@ export function AppProvider({ children }) {
     if (updates.familyVisible !== undefined) dbUpdates.family_visible = updates.familyVisible
     if (updates.note          !== undefined) dbUpdates.note           = updates.note
     if (updates.imageUrl      !== undefined) dbUpdates.image_url      = updates.imageUrl
+    if (updates.imageCaption  !== undefined) dbUpdates.image_caption  = updates.imageCaption
 
     const { data, error } = await supabase
       .from('user_events')
