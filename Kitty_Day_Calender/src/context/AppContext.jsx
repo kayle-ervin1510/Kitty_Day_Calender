@@ -228,9 +228,10 @@ export function AppProvider({ children }) {
 
   async function resetPassword(email) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      redirectTo: `${window.location.origin}/auth/callback`,
     })
     if (error) return { success: false, error: error.message, status: error.status ?? 429 }
+    localStorage.setItem('kitty_reset_pending', '1')
     return { success: true }
   }
 

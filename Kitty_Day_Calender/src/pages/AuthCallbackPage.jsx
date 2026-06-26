@@ -7,9 +7,7 @@ export default function AuthCallbackPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const code   = params.get('code')
-    const type   = params.get('type')
+    const code = new URLSearchParams(window.location.search).get('code')
 
     if (!code) {
       navigate('/login', { replace: true })
@@ -18,12 +16,13 @@ export default function AuthCallbackPage() {
 
     supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
       if (err) {
+        localStorage.removeItem('kitty_reset_pending')
         setError(err.message)
         return
       }
-      // type=recovery is set by resetPasswordForEmail's redirectTo — send to
-      // the new-password form. All other flows (email confirm) go to /home.
-      if (type === 'recovery') {
+      const isRecovery = localStorage.getItem('kitty_reset_pending')
+      localStorage.removeItem('kitty_reset_pending')
+      if (isRecovery) {
         navigate('/reset-password', { replace: true })
       } else {
         navigate('/home', { replace: true })
