@@ -14,20 +14,28 @@ export default function AuthCallbackPage() {
       return
     }
 
+    // Register BEFORE exchangeCodeForSession so we don't miss the event.
+    // PASSWORD_RECOVERY → send to /reset-password.
+    // SIGNED_IN → normal email confirm; AppContext sets user and ProtectedLayout
+    //             redirects to /home, but we navigate explicitly here too for speed.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        subscription.unsubscribe()
+        navigate('/reset-password', { replace: true })
+      } else if (event === 'SIGNED_IN') {
+        subscription.unsubscribe()
+        navigate('/home', { replace: true })
+      }
+    })
+
     supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
       if (err) {
+        subscription.unsubscribe()
         setError(err.message)
-        return
       }
-      // PASSWORD_RECOVERY sessions need the user to set a new password first.
-      // All other sessions (email confirm, OAuth) let ProtectedLayout redirect to /home.
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          subscription.unsubscribe()
-          navigate('/reset-password', { replace: true })
-        }
-      })
     })
+
+    return () => subscription.unsubscribe()
   }, [navigate])
 
   if (error) {

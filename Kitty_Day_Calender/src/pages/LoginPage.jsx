@@ -127,79 +127,88 @@ export default function LoginPage() {
         </div>
 
         {tab === 'signin' ? (
-          <form className="login-form" onSubmit={handleSignIn}>
-            <div className="form-group">
-              <label htmlFor="si-id">Username or Email</label>
-              <input
-                id="si-id"
-                type="text"
-                placeholder="Enter your username or email"
-                value={signInForm.usernameOrEmail}
-                onChange={e => siField('usernameOrEmail', e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="si-pw">Password</label>
-              <input
-                id="si-pw"
-                type="password"
-                placeholder="Enter your password"
-                value={signInForm.password}
-                onChange={e => siField('password', e.target.value)}
-                required
-              />
-            </div>
-            <p style={{ textAlign: 'right', margin: '-0.25rem 0 0.5rem' }}>
-              <button
-                type="button"
-                className="link-btn"
-                onClick={() => { setShowForgot(v => !v); setForgotMsg(''); setForgotError('') }}
-              >
-                Forgot password?
-              </button>
-            </p>
-
-            {showForgot && (
-              <form className="forgot-form" onSubmit={handleForgot}>
-                <div className="form-group">
-                  <label htmlFor="forgot-email">Enter your email to reset your password</label>
-                  <input
-                    id="forgot-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={forgotEmail}
-                    onChange={e => setForgotEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                {forgotError && <p className="form-error">{forgotError}</p>}
-                {forgotMsg   && <p className="form-success">{forgotMsg}</p>}
-                <button type="submit" className="btn btn-secondary btn-full">
-                  Send Reset Link 📧
-                </button>
-              </form>
-            )}
-
-            {error && (
-              <div className="form-error-block">
-                {errorStatus && HTTP_ERROR_CODES.has(errorStatus) && (
-                  <HttpCatImage status={errorStatus} className="form-http-cat" />
-                )}
-                <p className="form-error">{error}</p>
+          showForgot ? (
+            <form className="forgot-form login-form" onSubmit={handleForgot}>
+              <div className="form-group">
+                <label htmlFor="forgot-email">Enter your email to reset your password</label>
+                <input
+                  id="forgot-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={forgotEmail}
+                  onChange={e => setForgotEmail(e.target.value)}
+                  required
+                  autoFocus
+                />
               </div>
-            )}
-            <button type="submit" className="btn btn-primary btn-full btn-lg">
-              Sign In 🐾
-            </button>
-            <p className="login-switch">
-              Don&apos;t have an account?{' '}
-              <button type="button" className="link-btn" onClick={() => switchTab('signup')}>
-                Sign up here
+              {forgotError && <p className="form-error">{forgotError}</p>}
+              {forgotMsg   && <p className="form-success">{forgotMsg}</p>}
+              <button type="submit" className="btn btn-secondary btn-full">
+                Send Reset Link 📧
               </button>
-            </p>
-          </form>
+              <p style={{ textAlign: 'center', marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => { setShowForgot(false); setForgotMsg(''); setForgotError('') }}
+                >
+                  Back to sign in
+                </button>
+              </p>
+            </form>
+          ) : (
+            <form className="login-form" onSubmit={handleSignIn}>
+              <div className="form-group">
+                <label htmlFor="si-id">Username or Email</label>
+                <input
+                  id="si-id"
+                  type="text"
+                  placeholder="Enter your username or email"
+                  value={signInForm.usernameOrEmail}
+                  onChange={e => siField('usernameOrEmail', e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="si-pw">Password</label>
+                <input
+                  id="si-pw"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={signInForm.password}
+                  onChange={e => siField('password', e.target.value)}
+                  required
+                />
+              </div>
+              <p style={{ textAlign: 'right', margin: '-0.25rem 0 0.5rem' }}>
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => { setShowForgot(true); setForgotMsg(''); setForgotError('') }}
+                >
+                  Forgot password?
+                </button>
+              </p>
+              {error && (
+                <div className="form-error-block">
+                  {errorStatus && HTTP_ERROR_CODES.has(errorStatus) && (
+                    <HttpCatImage status={errorStatus} className="form-http-cat" />
+                  )}
+                  <p className="form-error">{error}</p>
+                </div>
+              )}
+              <button type="submit" className="btn btn-primary btn-full btn-lg">
+                Sign In 🐾
+              </button>
+              <p className="login-switch">
+                Don&apos;t have an account?{' '}
+                <button type="button" className="link-btn" onClick={() => switchTab('signup')}>
+                  Sign up here
+                </button>
+              </p>
+            </form>
+          )
         ) : (
           <form className="login-form" onSubmit={handleSignUp}>
             <div className="form-row">
