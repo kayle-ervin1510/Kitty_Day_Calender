@@ -43,16 +43,23 @@ npm run preview    # Serve the dist/ build locally
 npm run lint       # ESLint
 ```
 
-Playwright is configured for E2E tests. Tests live in `tests/`. The dev server starts automatically:
+Playwright is configured for E2E tests. Tests live in `tests/`. The dev server starts automatically for local runs. To test against production, pass `BASE_URL`:
 
 ```bash
-npm test                                         # run all Playwright tests
-npx playwright test tests/auth-phases.spec.js   # run the 5-phase auth suite
-npx playwright test tests/auth-callback.spec.js # run the email-confirm callback test
-npx playwright test --headed                    # run with browser visible
+npm test                                                                   # run all tests (local dev server)
+BASE_URL=https://kitty-day-calender.vercel.app npm test                    # run against production
+
+npx playwright test tests/auth-phases.spec.js                             # 5-phase auth suite
+npx playwright test tests/auth-callback.spec.js                           # email-confirm callback
+npx playwright test tests/crud-flow.spec.js                               # login → create → edit → delete → logout
+npx playwright test tests/password-reset.spec.js                          # password reset UI flow
+npx playwright test --headed                                              # run with browser visible
 ```
 
-`auth-phases.spec.js` covers 5 phases: registration form validation, login, auth failure, RLS isolation, and session persistence. Phases 2–5 require env vars: `TEST_USER=<username_or_email> TEST_PASS=<password> npm test` — without them those phases are skipped.
+**Per-suite env vars:**
+- `auth-phases.spec.js` — Phases 2–5 require `TEST_USER=<username_or_email> TEST_PASS=<password>`; skipped otherwise.
+- `crud-flow.spec.js` — Uses hardcoded credentials (see top of file). Event names > 11 chars are truncated in calendar pill DOM text; use `.cal-pill[title="..."]` to match full names. Uses Day view to see all events (month view caps at 2 pills per cell).
+- `password-reset.spec.js` — Phase 3 (email submission) requires `TEST_EMAIL=<registered_email>`; skipped otherwise.
 
 > **Test rate-limit gotcha:** `auth-callback.spec.js` calls `supabase.auth.signUp`, which counts against Supabase's free-tier email limit (~3 confirmation emails/hour). Running it too frequently returns "email rate limit exceeded." Bypass during dev by disabling email confirmation in Supabase → Authentication → Providers → Email → "Confirm email."
 
@@ -247,4 +254,4 @@ Linked project: **Kitty Day Calendar** (ref `ntazfxyuwzqoavsfvdmm`, AWS us-east-
 ## See also
 
 - `Kitty_Day_Calender/CLAUDE.md` — frontend-scoped reference; **note:** may lag behind this file on recently added features
-- `supabase/CLAUDE.md` — Supabase schema and RLS details
+- `supabase/CLAUDE.md` — Supabase schema and RLS details; **note:** stale — shows 14 migrations and is missing `family_invites`, `get_shared_events_for_user`, and `accept_family_invite`. The tables and RPCs sections in this file are authoritative.
